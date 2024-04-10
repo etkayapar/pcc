@@ -1,0 +1,3 @@
+[submodule "utils/phylo_scripts"]
+	path = utils/phylo_scripts
+	url = https://github.com/etkayapar/phylo_scripts
