@@ -1,0 +1,6 @@
+channels:
+    - r
+    - bioconda
+dependencies:
+    - r-phytools
+    - r-ape
