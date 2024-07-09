@@ -1,3 +1,5 @@
+import os
+
 def get_gene_list_to_infer_tree(wildcards):
     # if stage == "before_trimal":
     #     genes_list = expand(checkpoints.infer_genes_trees_before_trimal.output[0],gene=genes)

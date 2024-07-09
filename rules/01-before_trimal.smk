@@ -1,17 +1,5 @@
 stage = "before_trimal"
 
-rule first_pass:
-    input:
-        "before_trimal/outlier_detection/outlier_genes.txt"
-
-rule second_pass:
-    input:
-        "after_trimal/outlier_detection/outlier_genes.txt"
-
-rule conclude:
-    input:
-        "supermatrix.phy"
-
 rule init_before_trimal:
     input:
         nt="genewise_fastas/{gene}.fa",
