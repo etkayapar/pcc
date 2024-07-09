@@ -421,6 +421,7 @@ def parse_trimal(fname):
     with open(fname) as trimal:
         trimal_result = trimal.readlines()
         trimal_result = ", ".join([x.strip() for x in trimal_result]).split(", ")
+        trimal_result[0] = trimal_result[0].replace("#ColumnsMap\t", "")
         trimal_result = [int(x) + 1 for x in trimal_result if x != '']
         flanks = list(ranges(trimal_result))
     
