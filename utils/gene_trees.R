@@ -1,5 +1,6 @@
 library(ape)
 args = commandArgs(trailingOnly=TRUE)
+print(args)
 threshold = args[1]
 tax_threshold = args[2]
 trees_file = args[3]
@@ -48,7 +49,7 @@ split_trees = function(tree, retain_threshold=0.9, prop_max_threshold=0.1){
 ### Reading in the tree and the data -----
 gene_trees = read.tree(trees_file)
 gene_names = scan(gene_names_file, what=character())
-setwd(output_dir)
+#setwd(output_dir)
 
 max_n_tax = max(sapply(gene_trees, function(x){length(x$tip.label)}))
 
@@ -77,44 +78,54 @@ saved_trees = sapply(long_branch_enough_taxa_genes, function(gene){
     }
     return(this_tree_saved)
 })
-sum(sapply(saved_trees, is.null))
-pdf("saved_genes.pdf", 40,20)
-par(mfrow=c(1,2))
-sapply(names(saved_trees), function(gene){
-    orig_tree = gene_trees[[gene]]
-    saved_tree = saved_trees[[gene]]
-    plot(orig_tree, cex=0.5, main=gene)
-    if(is.null(saved_tree)){
-        plot.new()
-    }else{
-        plot(saved_tree, cex=0.5, main=paste(gene,"_saved", sep=""))
-    }
-    return(NULL)
-})
+pdf(paste(output_dir,"saved_genes.pdf", sep="/"), 40,20)
+if(length(saved_trees) !=0) {
+    sum(sapply(saved_trees, is.null))
+    par(mfrow=c(1,2))
+    sapply(names(saved_trees), function(gene){
+        orig_tree = gene_trees[[gene]]
+        saved_tree = saved_trees[[gene]]
+        plot(orig_tree, cex=0.5, main=gene)
+        if(is.null(saved_tree)){
+            plot.new()
+        }else{
+            plot(saved_tree, cex=0.5, main=paste(gene,"_saved", sep=""))
+        }
+        return(NULL)
+    })
+}
 dev.off()
 
-saved_genes = names(saved_trees)[sapply(saved_trees, function(x){!is.null(x)})]
+
+if(length(saved_trees) !=0) {
+    saved_genes = names(saved_trees)[sapply(saved_trees, function(x){!is.null(x)})]
+}
 
 outlier_genes = names(prop_max[prop_max > threshold | prop_tax < tax_threshold])
-outlier_genes = setdiff(outlier_genes, saved_genes)
 
-pdf("outlier_genes.pdf",30,30)
+if(length(saved_trees) !=0) {
+    outlier_genes = setdiff(outlier_genes, saved_genes)
+}
+
+pdf(paste(output_dir,"outlier_genes.pdf", sep="/"),30,30)
 par(mfrow=c(5,5))
 sapply(outlier_genes, function(X){
     plot(gene_trees[[X]], main=X)
 })
 dev.off()
-write(outlier_genes, file = "outlier_genes.txt",sep='\n')
+write(outlier_genes, file = paste(output_dir,"outlier_genes.txt", sep="/"),sep='\n')
 
 #### Write out kept taxa for saved genes ------
-out.dir = "saved_genes_kept_taxa"
-if (!file.exists(out.dir)){
-    dir.create(out.dir)
-}
+    out.dir = paste(output_dir,"saved_genes_kept_taxa", sep="/")
+    if (!file.exists(out.dir)){
+        dir.create(out.dir)
+    }
 
-sapply(saved_genes, function(gene){
-    nm = paste(gene, "_kept_taxa.txt", sep="")
-    nm = file.path(out.dir, nm)
-    taxa = saved_trees[[gene]]$tip.label
-    write(taxa, file=nm, sep='\n')
-})
+if(length(saved_trees) !=0) {
+    sapply(saved_genes, function(gene){
+        nm = paste(gene, "_kept_taxa.txt", sep="")
+        nm = file.path(output_dir,out.dir, nm)
+        taxa = saved_trees[[gene]]$tip.label
+        write(taxa, file=nm, sep='\n')
+    })
+}
