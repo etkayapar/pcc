@@ -4,3 +4,4 @@ channels:
 dependencies:
     - mafft =7.525
     - trimal=1.4
+    - biopython =1.83
