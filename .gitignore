@@ -1,2 +1,6 @@
 *~
 #*#
+.*.~undo-tree~
+.snakemake/
+logs/
+output/
