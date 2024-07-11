@@ -3,10 +3,10 @@ for stage in STAGES:
     rule:
         name: f"infer_gene_trees_{stage}"
         input:
-            f"{stage}/gene_tree_input/{{gene}}.fa"
+            f"output/{stage}/gene_tree_input/{{gene}}.fa"
         output:
-            treefile=f"{stage}/gene_trees/{{gene}}/{{gene}}.treefile",
-            treedir=directory(f"{stage}/gene_trees/{{gene}}")
+            treefile=f"output/{stage}/gene_trees/{{gene}}/{{gene}}.treefile",
+            treedir=directory(f"output/{stage}/gene_trees/{{gene}}")
         threads: 4
         conda:
             "../envs/iqtree.yaml"
@@ -21,11 +21,11 @@ for stage in STAGES:
         name: f"collect_gene_trees_{stage}"
         input:
             branch(stage=="before_trimal",
-                   then=expand(f"{stage}/gene_trees/{{gene}}/{{gene}}.treefile", gene=genes),
+                   then=expand(f"output/{stage}/gene_trees/{{gene}}/{{gene}}.treefile", gene=genes),
                    otherwise=get_gene_list_to_infer_tree_after)
         output:
-            trees=f"{stage}/outlier_detection/all_genes.treefile",
-            gene_names=f"{stage}/outlier_detection/all_genes_names.txt"
+            trees=f"output/{stage}/outlier_detection/all_genes.treefile",
+            gene_names=f"output/{stage}/outlier_detection/all_genes_names.txt"
         shell:
             """
             find {input} | cut -d '/' -f3 > {output.gene_names}
@@ -34,12 +34,12 @@ for stage in STAGES:
     rule:
         name: f"unalign_outliers_{stage}"
         input:
-            nt=f"{stage}/outlier_detection/final_output/{{gene}}.fa",
+            nt=f"output/{stage}/outlier_detection/final_output/{{gene}}.fa",
             scr_path="utils/phylo_scripts/unalignFasta.awk",
             tra_path="utils/phylo_scripts/translate_stdin.py"
         output:
-            nt_unaligned=f"{stage}/outlier_detection/realignment/{{gene}}.fa",
-            aa_unaligned=f"{stage}/outlier_detection/realignment/{{gene}}.faa"
+            nt_unaligned=f"output/{stage}/outlier_detection/realignment/{{gene}}.fa",
+            aa_unaligned=f"output/{stage}/outlier_detection/realignment/{{gene}}.faa"
         wildcard_constraints:
             gene="[A-Za-z0-9]+"
         conda:
@@ -52,9 +52,9 @@ for stage in STAGES:
     rule:
         name: f"realign_outliers_{stage}"
         input:
-            aa=f"{stage}/outlier_detection/realignment/{{gene}}.faa"
+            aa=f"output/{stage}/outlier_detection/realignment/{{gene}}.faa"
         output:
-            aa_aln=f"{stage}/outlier_detection/realignment/{{gene}}_aligned.faa"
+            aa_aln=f"output/{stage}/outlier_detection/realignment/{{gene}}_aligned.faa"
         conda:
             "../envs/mafft.yaml"
         threads: 4

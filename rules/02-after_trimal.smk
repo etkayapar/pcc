@@ -1,8 +1,8 @@
 rule init_after_trimal:
     input:
-        "before_trimal/outlier_detection/realignment/{gene}_aligned.fa"
+        "output/before_trimal/outlier_detection/realignment/{gene}_aligned.fa"
     output:
-        "after_trimal/gene_tree_input/{gene}.fa"
+        "output/after_trimal/gene_tree_input/{gene}.fa"
     shell:
         """
         utils/phylo_scripts/cleanAllGaps {input} > {output}
@@ -10,13 +10,13 @@ rule init_after_trimal:
 
 rule detect_outliers_after_trimal:
     input:
-        treefile="after_trimal/outlier_detection/all_genes.treefile",
-        gene_names="after_trimal/outlier_detection/all_genes_names.txt"
+        treefile="output/after_trimal/outlier_detection/all_genes.treefile",
+        gene_names="output/after_trimal/outlier_detection/all_genes_names.txt"
     output:
-        saved_genes_plot  ="after_trimal/outlier_detection/saved_genes.pdf",
-        outlier_genes_plot="after_trimal/outlier_detection/outlier_genes.pdf",
-        outlier_genes_list="after_trimal/outlier_detection/outlier_genes.txt",
-        kept_taxa_dir=directory("after_trimal/outlier_detection/saved_genes_kept_taxa")
+        saved_genes_plot  ="output/after_trimal/outlier_detection/saved_genes.pdf",
+        outlier_genes_plot="output/after_trimal/outlier_detection/outlier_genes.pdf",
+        outlier_genes_list="output/after_trimal/outlier_detection/outlier_genes.txt",
+        kept_taxa_dir=directory("output/after_trimal/outlier_detection/saved_genes_kept_taxa")
     conda:
         "../envs/detect_outliers.yaml"
     params:
@@ -29,15 +29,15 @@ rule detect_outliers_after_trimal:
 
 checkpoint process_outliers_after_trimal:
     input:
-        aln_dir="after_trimal/gene_tree_input",
+        aln_dir="output/after_trimal/gene_tree_input",
         keep_taxa_path="utils/phylo_scripts/keep_taxa.awk"
     output:
-        genelist="after_trimal/outlier_detection/final_output/genelist.txt",
-        d=directory("after_trimal/outlier_detection/final_output")
+        genelist="output/after_trimal/outlier_detection/final_output/genelist.txt",
+        d=directory("output/after_trimal/outlier_detection/final_output")
         #"{stage}/outlier_detection/final_output/{gene}.fa"
     params:
-        #kept_taxa_path="after_trimal/outlier_detection/saved_genes_kept_taxa/{{gene}}_kept_taxa.txt",
-        outlier_genes_path="after_trimal/outlier_detection/outlier_genes.txt"
+        #kept_taxa_path="output/after_trimal/outlier_detection/saved_genes_kept_taxa/{{gene}}_kept_taxa.txt",
+        outlier_genes_path="output/after_trimal/outlier_detection/outlier_genes.txt"
     log:
         workflow.basedir+"/logs/after_trimal/process_outliers.log"
     shell:
@@ -45,7 +45,7 @@ checkpoint process_outliers_after_trimal:
         set +o pipefail
         (for gene in `ls {input.aln_dir}/ | grep -E "*.fa$" | cut -d. -f 1`
         do
-            kept_taxa_path="after_trimal/outlier_detection/saved_genes_kept_taxa/${{gene}}_kept.taxa.txt"
+            kept_taxa_path="output/after_trimal/outlier_detection/saved_genes_kept_taxa/${{gene}}_kept.taxa.txt"
             if [[ -f $kept_taxa_path ]]
             then
             {input.keep_taxa_path} -v taxafile=${{kept_taxa_path}} {input.aln_dir}/${{gene}}.fa > {output.d}/${{gene}}.fa
@@ -62,11 +62,11 @@ checkpoint process_outliers_after_trimal:
 
 rule backtranslate_final:
     input:
-        nt="after_trimal/outlier_detection/realignment/{gene}.fa",
-        aa_msa="after_trimal/outlier_detection/realignment/{gene}_aligned.faa",
+        nt="output/after_trimal/outlier_detection/realignment/{gene}.fa",
+        aa_msa="output/after_trimal/outlier_detection/realignment/{gene}_aligned.faa",
         pal2nal_path=workflow.basedir+"/utils/extract-buscos/pal2nal.py"
     output:
-        nt_aln="after_trimal/outlier_detection/realignment/{gene}_aligned.fa"
+        nt_aln="output/after_trimal/outlier_detection/realignment/{gene}_aligned.fa"
     log:
         workflow.basedir+"/logs/after_trimal/backtranslate_final/{gene}_backtranslate.log"
     conda:
@@ -81,8 +81,8 @@ rule init_concatenate:
     input:
         get_gene_list_to_concatenate
     output:
-        d=directory("genes_to_concat/"),
-        okf="genes_to_concat/OK"
+        d=directory("output/genes_to_concat/"),
+        okf="output/genes_to_concat/OK"
     shell:
         """
         mkdir -p {output.d}
@@ -93,10 +93,10 @@ rule init_concatenate:
 
 rule concatenate:
     input:
-        okf="genes_to_concat/OK"
+        okf="output/genes_to_concat/OK"
     output:
-        data="supermatrix.phy",
-        part="supermatrix.nex"
+        data="output/supermatrix.phy",
+        part="output/supermatrix.nex"
     conda:
         "../envs/phylo_scripts_python.yaml"
     shell:
