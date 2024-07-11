@@ -12,30 +12,30 @@ snakemake --sdm conda --cores <NUM_THREADS> first_pass
 ```
 
 Would do:
-1. Align the translated gene sequences by `mafft` with the `L-INS-i` algorithm
-2. Backtranslate the aligned amino-acid alignments into nucleotide alignments
-3. Remove fasta entries from genes that consist of gaps entirely (Genes that had a header but no sequence in the input nucleotide fasta files)
-4. Infer gene trees using IQ-TREE
-5. Collect all gene trees into a single `.treefile`
-6. Run a basic gene/sequence filtering script based on relative branch lenghts within each gene tree.
-7. Remove sequences from gene alignment (or discard entire gene alignments) according to the output of the previous step.
+- 1. Align the translated gene sequences by `mafft` with the `L-INS-i` algorithm
+- 2. Backtranslate the aligned amino-acid alignments into nucleotide alignments
+- 3. Remove fasta entries from genes that consist of gaps entirely (Genes that had a header but no sequence in the input nucleotide fasta files)
+- 4. Infer gene trees using IQ-TREE
+- 5. Collect all gene trees into a single `.treefile`
+- 6. Run a basic gene/sequence filtering script based on relative branch lenghts within each gene tree.
+- 7. Remove sequences from gene alignment (or discard entire gene alignments) according to the output of the previous step.
 
 ``` bash
 snakemake --sdm conda --cores <NUM_THREADS> second_pass
 ```
 
 Would do:
-8. Unalign the the processed gene alignment sequences that made the filtering step, translate into amino-acid sequences.
-9. Realign the amino-acid sequences
-10. Run `trimAl` with `--automated1` heuristic to mark candidate columns to retain after getting rid of gap-rich columns and backtranslate the amino-acid alignment to a nucleotide alignment while only keeping the columns deemed ok by `trimAl`.
-11. Repeat steps 5-7 for the trimal-processed alignments.
+- 8. Unalign the the processed gene alignment sequences that made the filtering step, translate into amino-acid sequences.
+- 9. Realign the amino-acid sequences
+- 10. Run `trimAl` with `--automated1` heuristic to mark candidate columns to retain after getting rid of gap-rich columns and backtranslate the amino-acid alignment to a nucleotide alignment while only keeping the columns deemed ok by `trimAl`.
+- 11. Repeat steps 5-7 for the trimal-processed alignments.
 
 ``` bash
 snakemake --sdm conda --cores <NUM_THREADS> conclude
 ```
 
 Would do:
-12. Repeat steps 8,9 for the trimal-processed alignments.
-13. Backtranslate the resulting amino-acid alignments.
-14. Collect the final nucleotide alignments into a directory
-15. run `concat-aln` to concatenate the genewise alignments into a supermatrix in `PHYLIP` format (`output/supermatrix.phy`) and also generate a partition table in the `NEXUS` format (`output/supermatrix.nex`)
+- 12. Repeat steps 8,9 for the trimal-processed alignments.
+- 13. Backtranslate the resulting amino-acid alignments.
+- 14. Collect the final nucleotide alignments into a directory
+- 15. run `concat-aln` to concatenate the genewise alignments into a supermatrix in `PHYLIP` format (`output/supermatrix.phy`) and also generate a partition table in the `NEXUS` format (`output/supermatrix.nex`)
