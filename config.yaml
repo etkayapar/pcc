@@ -1,0 +1,9 @@
+### Software paramaters
+
+gene_table: gene_table.tsv
+params:
+    general:
+        num_threads: 4
+    detect_outliers:
+        long_branch_threshold: 0.1
+        taxa_threshold: 0.7
