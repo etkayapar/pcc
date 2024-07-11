@@ -35,8 +35,8 @@ rule backtranslate:
         "../envs/phylo_scripts_python.yaml"
     shell:
         """
-        ln -r -s {input.nt} before_trimal/mafft_output/{wildcards.gene}.fa
-        cd before_trimal/mafft_output
+        ln -r -s {input.nt} output/before_trimal/mafft_output/{wildcards.gene}.fa
+        cd output/before_trimal/mafft_output
         (python3 {input.pal2nal_path} {wildcards.gene}) 2> {log}
         """
 
@@ -61,11 +61,11 @@ rule detect_outliers_before_trimal:
     conda:
         "../envs/detect_outliers.yaml"
     params:
-        long_branch_threshold=0.1,
-        taxa_threshold=0.7
+        long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"],
+        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"]
     shell:
         f"""
-        Rscript utils/gene_trees.R {{params.long_branch_threshold}} {{params.taxa_threshold}} {{input.treefile}} {{input.gene_names}} before_trimal/outlier_detection > gt.log 2>gt.err
+        Rscript utils/gene_trees.R {{params.long_branch_threshold}} {{params.taxa_threshold}} {{input.treefile}} {{input.gene_names}} output/before_trimal/outlier_detection > gt.log 2>gt.err
         """
 
 checkpoint process_outliers_before_trimal:

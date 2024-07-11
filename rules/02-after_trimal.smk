@@ -20,11 +20,11 @@ rule detect_outliers_after_trimal:
     conda:
         "../envs/detect_outliers.yaml"
     params:
-        long_branch_threshold=0.1,
-        taxa_threshold=0.7
+        long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"],
+        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"]
     shell:
         f"""
-        Rscript utils/gene_trees.R {{params.long_branch_threshold}} {{params.taxa_threshold}} {{input.treefile}} {{input.gene_names}} after_trimal/outlier_detection > gt.log 2>gt.err
+        Rscript utils/gene_trees.R {{params.long_branch_threshold}} {{params.taxa_threshold}} {{input.treefile}} {{input.gene_names}} output/after_trimal/outlier_detection > gt.log 2>gt.err
         """
 
 checkpoint process_outliers_after_trimal:
@@ -103,4 +103,5 @@ rule concatenate:
         """
         rm {input.okf}
         concat-aln $(dirname {input.okf}) supermatrix DNA
+        mv supermatrix.{{phy,nex}} output/
         """
