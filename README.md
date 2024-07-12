@@ -1,6 +1,6 @@
 # PCC (Phylogenetic dataset Compiler Collection)
 
-This is a simple and crudely made Snakemake workflow for compiling phylogenetic datasets from extracted coding sequences of protein-coding genes.
+This is a simple and crudely made Snakemake workflow for compiling phylogenetic datasets from extracted coding sequences of **nuclear** (for now) protein-coding genes.
 It can work reasonably well with sequences retrieved by running BUSCO as input. There is very little flexibility as to the tools used for the different steps and the parameters as this mainly for my personal use at the moment. I plan to add new functionality (alternative tools for the same rules, or more options in the rules themselves) later.
 
 ## What do you need to use it
