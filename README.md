@@ -4,9 +4,16 @@ This is a simple and crudely made Snakemake workflow for compiling phylogenetic 
 It can work reasonably well with sequences retrieved by running BUSCO as input. There is very little flexibility as to the tools used for the different steps and the parameters as this mainly for my personal use at the moment. I plan to add new functionality (alternative tools for the same rules, or more options in the rules themselves) later.
 
 ## What do you need to use it
-You need to have `snakemake` installed, which can be installed using `conda` into its own environment. I will add an `environment.yaml` for this workflow that will make things easier later.
+1. You need to have `snakemake` installed, which can be installed using `conda` into its own environment. I will add an `environment.yaml` for this workflow that will make things easier later.
 
-You need to have all your input genes as fasta files in `input/genewise_fastas` (relative to the project root directory), and their names in a single-column (for now) `gene_table.tsv` file in the project root directory that looks like this:
+2. Clone this repository and cd into it
+
+``` bash
+git clone https://github.com/etkayapar/pcc
+cd pcc
+```
+
+3. You need to have all your input genes as fasta files in `input/genewise_fastas` (relative to the project root directory), and their names in a single-column (for now) `gene_table.tsv` file in the project root directory that looks like below.
 
 (First line is a header)
 ```
