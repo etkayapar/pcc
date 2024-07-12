@@ -1,7 +1,28 @@
 # PCC (Phylogenetic dataset Compiler Collection)
 
 This is a simple and crudely made Snakemake workflow for compiling phylogenetic datasets from extracted coding sequences of protein-coding genes.
-It can work reasonably well with sequences retrieved by running BUSCO as input. There is very little flexibility as to the tools used for the different steps and the parameters as this mainly for my personal use at the moment.
+It can work reasonably well with sequences retrieved by running BUSCO as input. There is very little flexibility as to the tools used for the different steps and the parameters as this mainly for my personal use at the moment. I plan to add new functionality (alternative tools for the same rules, or more options in the rules themselves) later.
+
+## What do you need to use it
+You need to have `snakemake` installed, which can be installed using `conda` into its own environment. I will add an `environment.yaml` for this workflow that will make things easier later.
+
+You need to have all your input genes as fasta files in `input/genewise_fastas` (relative to the project root directory), and their names in a single-column (for now) `gene_table.tsv` file in the project root directory that looks like this:
+
+(First line is a header)
+```
+gene
+geneName1
+geneName2
+```
+
+assuming that you have the FASTA files in paths like:
+
+```
+input/genewise_fastas/geneName1.fa
+input/genewise_fastas/geneName2.fa
+```
+
+Gene names should not have any underscores or hyphens or any other breaking character (for now) they can only include alphanumeric characters (upper or lowercase letters are fine). FASTA files themselves are exptected to have the extension `.fa` and not any other common versions such has `.fna` or `.fasta`
 
 ## Explanation of the workflow
 
