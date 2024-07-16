@@ -102,6 +102,6 @@ rule concatenate:
     shell:
         """
         rm {input.okf}
-        concat-aln $(dirname {input.okf}) supermatrix DNA
+        utils/phylo_scripts/concat-aln $(dirname {input.okf}) supermatrix DNA
         mv supermatrix.{{phy,nex}} output/
         """
