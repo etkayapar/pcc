@@ -86,7 +86,7 @@ checkpoint process_outliers_before_trimal:
         set +o pipefail
         (for gene in `ls {input.aln_dir}/ | grep -E "*.fa$" | cut -d. -f 1`
         do
-            kept_taxa_path="output/before_trimal/outlier_detection/saved_genes_kept_taxa/${{gene}}_kept.taxa.txt"
+            kept_taxa_path="output/before_trimal/outlier_detection/saved_genes_kept_taxa/${{gene}}_kept_taxa.txt"
             if [[ -f $kept_taxa_path ]]
             then
             {input.keep_taxa_path} -v taxafile=${{kept_taxa_path}} {input.aln_dir}/${{gene}}.fa > {output.d}/${{gene}}.fa

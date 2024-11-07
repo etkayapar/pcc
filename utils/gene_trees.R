@@ -124,7 +124,7 @@ write(outlier_genes, file = paste(output_dir,"outlier_genes.txt", sep="/"),sep='
 if(length(saved_trees) !=0) {
     sapply(saved_genes, function(gene){
         nm = paste(gene, "_kept_taxa.txt", sep="")
-        nm = file.path(output_dir,out.dir, nm)
+        nm = file.path(out.dir, nm)
         taxa = saved_trees[[gene]]$tip.label
         write(taxa, file=nm, sep='\n')
     })

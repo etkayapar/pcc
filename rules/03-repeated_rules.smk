@@ -28,7 +28,7 @@ for stage in STAGES:
             gene_names=f"output/{stage}/outlier_detection/all_genes_names.txt"
         shell:
             """
-            find {input} | cut -d '/' -f3 > {output.gene_names}
+            find {input} | cut -d '/' -f4 > {output.gene_names}
             cat {input} > {output.trees}
             """
     rule:
