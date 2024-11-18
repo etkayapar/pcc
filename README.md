@@ -1,3 +1,12 @@
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [PCC (Phylogenetic dataset Compiler Collection)](#pcc-phylogenetic-dataset-compiler-collection)
+    - [What do you need to use it](#what-do-you-need-to-use-it)
+    - [Explanation of the workflow](#explanation-of-the-workflow)
+
+<!-- markdown-toc end -->
+
 # PCC (Phylogenetic dataset Compiler Collection)
 
 This is a simple and crudely made Snakemake workflow for compiling phylogenetic datasets from extracted coding sequences of **nuclear** (for now) protein-coding genes.
@@ -6,10 +15,10 @@ It can work reasonably well with sequences retrieved by running BUSCO as input. 
 ## What do you need to use it
 1. You need to have `snakemake` installed, which can be installed using `conda` into its own environment. I will add an `environment.yaml` for this workflow that will make things easier later.
 
-2. Clone this repository and cd into it
+2. Clone this repository recursively and cd into it
 
 ``` bash
-git clone https://github.com/etkayapar/pcc
+git clone --recursive https://github.com/etkayapar/pcc
 cd pcc
 ```
 
@@ -71,3 +80,13 @@ snakemake --sdm conda --cores <NUM_THREADS> conclude
   13. Backtranslate the resulting amino-acid alignments.
   14. Collect the final nucleotide alignments into a directory
   15. run `concat-aln` to concatenate the genewise alignments into a supermatrix in `PHYLIP` format (`output/supermatrix.phy`) and also generate a partition table in the `NEXUS` format (`output/supermatrix.nex`)
+
+If you are sure that you don't want to supervise how to workflow executes in between the three steps explained above, you may try to run the entire workflow by using:
+
+``` bash
+snakemake --sdm conda --cores <NUM_THREADS> first_pass && \
+snakemake --sdm conda --cores <NUM_THREADS> second_pass && \
+snakemake --sdm conda --cores <NUM_THREADS> conclude
+```
+
+This sequence of snakemake calls should run the three consecutive steps while running a given step only if the previous step was successfully executed.
