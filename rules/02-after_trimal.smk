@@ -13,34 +13,31 @@ rule detect_outliers_after_trimal:
         treefile="output/after_trimal/outlier_detection/all_genes.treefile",
         gene_names="output/after_trimal/outlier_detection/all_genes_names.txt"
     output:
-        # saved_genes_plot  ="output/after_trimal/outlier_detection/saved_genes.pdf",
-        # outlier_genes_plot="output/after_trimal/outlier_detection/outlier_genes.pdf",
         outlier_genes_list="output/after_trimal/outlier_detection/outlier_genes.txt",
-        kept_taxa_dir=directory("output/after_trimal/outlier_detection/saved_genes_removed_taxa")
+        removed_taxa_dir=directory("output/after_trimal/outlier_detection/saved_genes_removed_taxa")
     conda:
         "../envs/treeshrink.yaml"
-        # "../envs/detect_outliers.yaml"
     params:
         long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"],
         taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"]
     shell:
         """
         touch {output.outlier_genes_list}
-        run_treeshrink.py -t {input.treefile} -m "per-gene" -o {output.kept_taxa_dir}
+        run_treeshrink.py -t {input.treefile} -m "per-gene" -o {output.removed_taxa_dir}
         ngenes=$(cat {input.gene_names} | wc -l)
         (for gene in `seq 1 $ngenes`
         do
         genename=$(sed "${{gene}}q;d" {input.gene_names})
-        sed "${{gene}}q;d" {output.kept_taxa_dir}/output.txt |  tr '\t' '\n' | sed '/^$/d' >{output.kept_taxa_dir}/${{genename}}_removed_taxa.txt
+        sed "${{gene}}q;d" {output.removed_taxa_dir}/output.txt |  tr '\t' '\n' | sed '/^$/d' >{output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
         original_ntax=$(grep -E "^>" output/after_trimal/gene_tree_input/${{genename}}.fa | wc -l)
-        new_ntax=$(cat {output.kept_taxa_dir}/${{genename}}_removed_taxa.txt | wc -l)
+        new_ntax=$(cat {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt | wc -l)
         if [ "$original_ntax" -eq "$new_ntax" ]
         then
-        rm {output.kept_taxa_dir}/${{genename}}_removed_taxa.txt
+        rm {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
         echo ${{genename}} >> {output.outlier_genes_list}
         elif [ "$new_ntax" -eq 0 ]
         then
-        rm {output.kept_taxa_dir}/${{genename}}_removed_taxa.txt
+        rm {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
         fi
         done)>treeshrink.err 2>treeshrink.err
         """
@@ -52,9 +49,7 @@ checkpoint process_outliers_after_trimal:
     output:
         genelist="output/after_trimal/outlier_detection/final_output/genelist.txt",
         d=directory("output/after_trimal/outlier_detection/final_output")
-        #"{stage}/outlier_detection/final_output/{gene}.fa"
     params:
-        #removed_taxa_path="output/after_trimal/outlier_detection/saved_genes_removed_taxa/{{gene}}_removed_taxa.txt",
         outlier_genes_path="output/after_trimal/outlier_detection/outlier_genes.txt"
     log:
         workflow.basedir+"/logs/after_trimal/process_outliers.log"
