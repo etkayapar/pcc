@@ -3,4 +3,5 @@ channels:
   - smirarab
   - conda-forge
 dependencies:
-  - treeshrink=1.3.9=py39r40_0
+  - treeshrink
+  - coreutils

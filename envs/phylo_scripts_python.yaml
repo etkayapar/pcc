@@ -3,3 +3,4 @@ channels:
     - conda-forge
 dependencies:
     - biopython =1.83
+    - coreutils
