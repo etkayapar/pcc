@@ -56,7 +56,7 @@ checkpoint process_outliers_after_trimal:
     shell:
         """
         set +o pipefail
-        (for gene in `ls {input.aln_dir}/ | grep -E "*.fa$" | cut -d. -f 1`
+        (for gene in `ls {input.aln_dir}/ | grep -E ".*\.fa$" | cut -d. -f 1`
         do
             removed_taxa_path="output/after_trimal/outlier_detection/saved_genes_removed_taxa/${{gene}}_removed_taxa.txt"
             if [[ -f $removed_taxa_path ]]
