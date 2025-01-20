@@ -24,14 +24,12 @@ with open(removed_taxa_path, 'r') as f:
 for gene,genename in enumerate(genenames):
     outlier_genes_path = snakemake.output[0]
     outlier_genes_file = open(outlier_genes_path, "w")
-    # breakpoint()
     this_gene_removed_taxa = removed_taxa[gene]
     with open(f"output/{pipeline_stage}/gene_tree_input/{genename}.fa") as f:
         fasta = f.readlines()
     original_ntax = len([x for x in fasta if x.startswith(">")])
     new_ntax = original_ntax - len(this_gene_removed_taxa)
     taxon_retaining_pct = new_ntax / original_ntax * 100
-    # breakpoint()
     if taxon_retaining_pct == 100:
         continue
     if taxon_retaining_pct != 0 and taxon_retaining_pct >= snakemake.params[0]:
@@ -40,6 +38,8 @@ for gene,genename in enumerate(genenames):
                 f.write(taxon+'\n')
     else:
         outlier_genes_file.write(genename+'\n')
+
+outlier_genes_file.close()
                 
     
         
