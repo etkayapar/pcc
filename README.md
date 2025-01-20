@@ -13,7 +13,7 @@ This is a simple and crudely made Snakemake workflow for compiling phylogenetic 
 It can work reasonably well with sequences retrieved by running BUSCO as input. There is very little flexibility as to the tools used for the different steps and the parameters as this mainly for my personal use at the moment. I plan to add new functionality (alternative tools for the same rules, or more options in the rules themselves) later.
 
 ## What do you need to use it
-1. You need to have `snakemake` installed, which can be installed using `conda` into its own environment. I will add an `environment.yaml` for this workflow that will make things easier later.
+1. You need to have `snakemake`  and `GNU Coreutils` installed, both of which can be installed in a `conda` environment. I will add an `environment.yaml` for this workflow that will make things easier later.
 
 2. Clone this repository recursively and cd into it
 
@@ -56,7 +56,7 @@ Would do:
   3. Remove fasta entries from genes that consist of gaps entirely (Genes that had a header but no sequence in the input nucleotide fasta files)
   4. Infer gene trees using IQ-TREE
   5. Collect all gene trees into a single `.treefile`
-  6. Run a basic gene/sequence filtering script based on relative branch lenghts within each gene tree.
+  6. Detect potential outlier sequences from gene trees using [TreeShrink](https://github.com/uym2/TreeShrink)
   7. Remove sequences from gene alignment (or discard entire gene alignments) according to the output of the previous step.
 
 ``` bash
