@@ -7,13 +7,14 @@ import os
 import subprocess as sp
 
 pipeline_stage=snakemake.params[1]
+treeshrink_mode=snakemake.params[2]
 
 ## Touch
 open(snakemake.output[0],'a').close()
 
 ## Run TreeShrink
 #run_treeshrink.py -t {input.treefile} -m "per-gene" -o {output.removed_taxa_dir}
-sp.run(['run_treeshrink.py', '-t', snakemake.input[0], '-m', 'auto', '-o', snakemake.output[1]])
+sp.run(['run_treeshrink.py', '-t', snakemake.input[0], '-m', treeshrink_mode, '-o', snakemake.output[1]])
 ## Calc ngenes
 with open(snakemake.input[1], 'r') as f:
     genenames = [x.strip() for x in f.readlines()]

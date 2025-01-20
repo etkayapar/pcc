@@ -60,7 +60,8 @@ rule detect_outliers_before_trimal:
         "../envs/treeshrink.yaml"
     params:
         taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"],
-        pipeline_stage="before_trimal"
+        pipeline_stage="before_trimal",
+        treeshrink_mode=config["params"]["detect_outliers"]["treeshrink_mode"]
     script:
         "../utils/detect_outliers.py"
     # shell:
