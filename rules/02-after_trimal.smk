@@ -18,29 +18,10 @@ rule detect_outliers_after_trimal:
     conda:
         "../envs/treeshrink.yaml"
     params:
-        long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"],
-        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"]
-    shell:
-        """
-        touch {output.outlier_genes_list}
-        run_treeshrink.py -t {input.treefile} -m "per-gene" -o {output.removed_taxa_dir}
-        ngenes=$(cat {input.gene_names} | wc -l)
-        (for gene in `seq 1 $ngenes`
-        do
-        genename=$(sed "${{gene}}q;d" {input.gene_names})
-        sed "${{gene}}q;d" {output.removed_taxa_dir}/output.txt |  tr '\t' '\n' | sed '/^$/d' >{output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
-        original_ntax=$(grep -E "^>" output/after_trimal/gene_tree_input/${{genename}}.fa | wc -l)
-        new_ntax=$(cat {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt | wc -l)
-        if [ "$original_ntax" -eq "$new_ntax" ]
-        then
-        rm {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
-        echo ${{genename}} >> {output.outlier_genes_list}
-        elif [ "$new_ntax" -eq 0 ]
-        then
-        rm {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
-        fi
-        done)>treeshrink.err 2>treeshrink.err
-        """
+        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"],
+        pipeline_stage="after_trimal"
+    script:
+        "../utils/detect_outliers.py"
 
 checkpoint process_outliers_after_trimal:
     input:
