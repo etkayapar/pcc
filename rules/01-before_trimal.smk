@@ -54,42 +54,59 @@ rule detect_outliers_before_trimal:
         treefile="output/before_trimal/outlier_detection/all_genes.treefile",
         gene_names="output/before_trimal/outlier_detection/all_genes_names.txt"
     output:
-        saved_genes_plot  ="output/before_trimal/outlier_detection/saved_genes.pdf",
-        outlier_genes_plot="output/before_trimal/outlier_detection/outlier_genes.pdf",
         outlier_genes_list="output/before_trimal/outlier_detection/outlier_genes.txt",
-        kept_taxa_dir=directory("output/before_trimal/outlier_detection/saved_genes_kept_taxa")
+        removed_taxa_dir=directory("output/before_trimal/outlier_detection/saved_genes_removed_taxa")
     conda:
-        "../envs/detect_outliers.yaml"
+        "../envs/treeshrink.yaml"
     params:
-        long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"],
-        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"]
-    shell:
-        f"""
-        Rscript utils/gene_trees.R {{params.long_branch_threshold}} {{params.taxa_threshold}} {{input.treefile}} {{input.gene_names}} output/before_trimal/outlier_detection > gt.log 2>gt.err
-        """
+        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"],
+        pipeline_stage="before_trimal",
+        treeshrink_mode=config["params"]["detect_outliers"]["treeshrink_mode"]
+    script:
+        "../utils/detect_outliers.py"
+    # shell:
+    #     """
+    #     touch {output.outlier_genes_list}
+    #     run_treeshrink.py -t {input.treefile} -m "per-gene" -o {output.removed_taxa_dir}
+    #     ngenes=$(cat {input.gene_names} | wc -l)
+    #     (for gene in `seq 1 $ngenes`
+    #     do
+    #     genename=$(sed "${{gene}}q;d" {input.gene_names})
+    #     sed "${{gene}}q;d" {output.removed_taxa_dir}/output.txt |  tr '\t' '\n' | sed '/^$/d' >{output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
+    #     original_ntax=$(grep -E "^>" output/before_trimal/gene_tree_input/${{genename}}.fa | wc -l)
+    #     new_ntax=$(cat {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt | wc -l)
+    #     if [ "$original_ntax" -eq "$new_ntax" ]
+    #     then
+    #     rm {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
+    #     echo ${{genename}} >> {output.outlier_genes_list}
+    #     elif [ "$new_ntax" -eq 0 ]
+    #     then
+    #     rm {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
+    #     fi
+    #     done)>treeshrink.err 2>treeshrink.err
+    #     """
 
+        
 checkpoint process_outliers_before_trimal:
     input:
         aln_dir="output/before_trimal/gene_tree_input",
-        keep_taxa_path="utils/phylo_scripts/keep_taxa.awk"
+        remove_taxa_path="utils/phylo_scripts/remove_taxa.awk"
     output:
         genelist="output/before_trimal/outlier_detection/final_output/genelist.txt",
         d=directory("output/before_trimal/outlier_detection/final_output")
-        #"{stage}/outlier_detection/final_output/{gene}.fa"
     params:
-        #kept_taxa_path="output/before_trimal/outlier_detection/saved_genes_kept_taxa/{{gene}}_kept_taxa.txt",
         outlier_genes_path="output/before_trimal/outlier_detection/outlier_genes.txt"
     log:
         workflow.basedir+"/logs/before_trimal/process_outliers.log"
     shell:
         """
         set +o pipefail
-        (for gene in `ls {input.aln_dir}/ | grep -E "*.fa$" | cut -d. -f 1`
+        (for gene in `ls {input.aln_dir}/ | grep -E ".*\.fa$" | cut -d. -f 1`
         do
-            kept_taxa_path="output/before_trimal/outlier_detection/saved_genes_kept_taxa/${{gene}}_kept_taxa.txt"
-            if [[ -f $kept_taxa_path ]]
+            removed_taxa_path="output/before_trimal/outlier_detection/saved_genes_removed_taxa/${{gene}}_removed_taxa.txt"
+            if [[ -f $removed_taxa_path ]]
             then
-            {input.keep_taxa_path} -v taxafile=${{kept_taxa_path}} {input.aln_dir}/${{gene}}.fa > {output.d}/${{gene}}.fa
+            {input.remove_taxa_path} -v taxafile=${{removed_taxa_path}} {input.aln_dir}/${{gene}}.fa > {output.d}/${{gene}}.fa
             echo ${{gene}} >> {output.genelist}
             elif grep -qw ${{gene}} {params.outlier_genes_path}
             then

@@ -2,6 +2,7 @@ channels:
     - bioconda
     - conda-forge
 dependencies:
-    - mafft =7.525
-    - trimal=1.4
-    - biopython =1.83
+    - mafft
+    - trimal
+    - biopython
+    - coreutils

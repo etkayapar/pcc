@@ -13,42 +13,37 @@ rule detect_outliers_after_trimal:
         treefile="output/after_trimal/outlier_detection/all_genes.treefile",
         gene_names="output/after_trimal/outlier_detection/all_genes_names.txt"
     output:
-        saved_genes_plot  ="output/after_trimal/outlier_detection/saved_genes.pdf",
-        outlier_genes_plot="output/after_trimal/outlier_detection/outlier_genes.pdf",
         outlier_genes_list="output/after_trimal/outlier_detection/outlier_genes.txt",
-        kept_taxa_dir=directory("output/after_trimal/outlier_detection/saved_genes_kept_taxa")
+        removed_taxa_dir=directory("output/after_trimal/outlier_detection/saved_genes_removed_taxa")
     conda:
-        "../envs/detect_outliers.yaml"
+        "../envs/treeshrink.yaml"
     params:
-        long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"],
-        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"]
-    shell:
-        f"""
-        Rscript utils/gene_trees.R {{params.long_branch_threshold}} {{params.taxa_threshold}} {{input.treefile}} {{input.gene_names}} output/after_trimal/outlier_detection > gt.log 2>gt.err
-        """
+        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"],
+        pipeline_stage="after_trimal",
+        treeshrink_mode=config["params"]["detect_outliers"]["treeshrink_mode"]
+    script:
+        "../utils/detect_outliers.py"
 
 checkpoint process_outliers_after_trimal:
     input:
         aln_dir="output/after_trimal/gene_tree_input",
-        keep_taxa_path="utils/phylo_scripts/keep_taxa.awk"
+        remove_taxa_path="utils/phylo_scripts/remove_taxa.awk"
     output:
         genelist="output/after_trimal/outlier_detection/final_output/genelist.txt",
         d=directory("output/after_trimal/outlier_detection/final_output")
-        #"{stage}/outlier_detection/final_output/{gene}.fa"
     params:
-        #kept_taxa_path="output/after_trimal/outlier_detection/saved_genes_kept_taxa/{{gene}}_kept_taxa.txt",
         outlier_genes_path="output/after_trimal/outlier_detection/outlier_genes.txt"
     log:
         workflow.basedir+"/logs/after_trimal/process_outliers.log"
     shell:
         """
         set +o pipefail
-        (for gene in `ls {input.aln_dir}/ | grep -E "*.fa$" | cut -d. -f 1`
+        (for gene in `ls {input.aln_dir}/ | grep -E ".*\.fa$" | cut -d. -f 1`
         do
-            kept_taxa_path="output/after_trimal/outlier_detection/saved_genes_kept_taxa/${{gene}}_kept_taxa.txt"
-            if [[ -f $kept_taxa_path ]]
+            removed_taxa_path="output/after_trimal/outlier_detection/saved_genes_removed_taxa/${{gene}}_removed_taxa.txt"
+            if [[ -f $removed_taxa_path ]]
             then
-            {input.keep_taxa_path} -v taxafile=${{kept_taxa_path}} {input.aln_dir}/${{gene}}.fa > {output.d}/${{gene}}.fa
+            {input.remove_taxa_path} -v taxafile=${{removed_taxa_path}} {input.aln_dir}/${{gene}}.fa > {output.d}/${{gene}}.fa
             echo ${{gene}} >> {output.genelist}
             elif grep -qw ${{gene}} {params.outlier_genes_path}
             then

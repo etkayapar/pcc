@@ -1,0 +1,7 @@
+name: threeshrink
+channels:
+  - smirarab
+  - conda-forge
+dependencies:
+  - treeshrink
+  - coreutils
