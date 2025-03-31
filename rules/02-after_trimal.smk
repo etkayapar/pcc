@@ -74,14 +74,28 @@ rule backtranslate_final:
 
 rule init_concatenate:
     input:
-        get_gene_list_to_concatenate
+        genes=get_gene_list_to_concatenate,
+        get_aln_len="utils/phylo_scripts/get_aln_len.awk"
     output:
         d=directory("output/genes_to_concat/"),
-        okf="output/genes_to_concat/OK"
+        okf="output/genes_to_concat/OK",
+        shortgenes="output/too_short_genes.txt"
+    params:
+        min_aln_len=config["params"]["concatenate"]["min_aln_len"]
     shell:
         """
         mkdir -p {output.d}
-        cp {input} {output.d}
+        touch {output.shortgenes}
+        for gene in {input.genes}
+        do
+            aln_len=$({input.get_aln_len} ${{gene}})
+            if [ $aln_len -ge {params.min_aln_len} ] 
+            then
+                cp ${{gene}} {output.d}
+            else
+                echo ${{gene}} >> {output.shortgenes}
+            fi
+        done
         touch {output.okf}
         """
 
@@ -97,6 +111,12 @@ rule concatenate:
     shell:
         """
         rm {input.okf}
+        if [ -z "$( ls $(dirname {input.okf}))" ]
+        then
+        echo "ERROR: None of the genes passed the minimum alignment length threshold"
+        exit 1
+        else
         utils/phylo_scripts/concat-aln $(dirname {input.okf}) supermatrix DNA
         mv supermatrix.{{phy,nex}} output/
+        fi
         """

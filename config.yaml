@@ -4,6 +4,8 @@ gene_table: gene_table.tsv
 params:
     general:
         num_threads: 4
+    concatenate:
+        min_aln_len: 0
     detect_outliers:
         taxa_threshold: 0.7
         treeshrink_mode: "auto"
