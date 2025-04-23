@@ -49,42 +49,38 @@ rule clean_all_gap_seqs:
         "utils/phylo_scripts/cleanAllGaps {input} > {output}"
 
 
-rule detect_outliers_before_trimal:
+rule run_treeshrink_before_trimal:
     input:
         treefile="output/before_trimal/outlier_detection/all_genes.treefile",
         gene_names="output/before_trimal/outlier_detection/all_genes_names.txt"
     output:
-        outlier_genes_list="output/before_trimal/outlier_detection/outlier_genes.txt",
-        removed_taxa_dir=directory("output/before_trimal/outlier_detection/saved_genes_removed_taxa")
+        treeshrink_output="output/before_trimal/outlier_detection/saved_genes_removed_taxa/output.treefile"
     conda:
         "../envs/treeshrink.yaml"
     params:
         taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"],
         pipeline_stage="before_trimal",
-        treeshrink_mode=config["params"]["detect_outliers"]["treeshrink_mode"]
+        treeshrink_mode=config["params"]["detect_outliers"]["treeshrink_mode"],
+        long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"]
+    script:
+        "../utils/detect_outliers_treeshrink.py"
+
+rule detect_outliers_before_trimal:
+    input:
+        treefile="output/before_trimal/outlier_detection/all_genes.treefile",
+        gene_names="output/before_trimal/outlier_detection/all_genes_names.txt",
+        treeshrink_output=rules.run_treeshrink_before_trimal.output.treeshrink_output
+    output:
+        outlier_genes_list="output/before_trimal/outlier_detection/outlier_genes.txt",
+    conda:
+        "../envs/detect_outliers.yaml"
+    params:
+        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"],
+        pipeline_stage="before_trimal",
+        treeshrink_mode=config["params"]["detect_outliers"]["treeshrink_mode"],
+        long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"]
     script:
         "../utils/detect_outliers.py"
-    # shell:
-    #     """
-    #     touch {output.outlier_genes_list}
-    #     run_treeshrink.py -t {input.treefile} -m "per-gene" -o {output.removed_taxa_dir}
-    #     ngenes=$(cat {input.gene_names} | wc -l)
-    #     (for gene in `seq 1 $ngenes`
-    #     do
-    #     genename=$(sed "${{gene}}q;d" {input.gene_names})
-    #     sed "${{gene}}q;d" {output.removed_taxa_dir}/output.txt |  tr '\t' '\n' | sed '/^$/d' >{output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
-    #     original_ntax=$(grep -E "^>" output/before_trimal/gene_tree_input/${{genename}}.fa | wc -l)
-    #     new_ntax=$(cat {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt | wc -l)
-    #     if [ "$original_ntax" -eq "$new_ntax" ]
-    #     then
-    #     rm {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
-    #     echo ${{genename}} >> {output.outlier_genes_list}
-    #     elif [ "$new_ntax" -eq 0 ]
-    #     then
-    #     rm {output.removed_taxa_dir}/${{genename}}_removed_taxa.txt
-    #     fi
-    #     done)>treeshrink.err 2>treeshrink.err
-    #     """
 
         
 checkpoint process_outliers_before_trimal:
