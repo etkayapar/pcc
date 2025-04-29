@@ -6,6 +6,7 @@ detect_outliers_after_trimal rules
 import os
 import subprocess as sp
 
+logf=open(snakemake.log[0], "w")
 taxon_threshold=snakemake.params[0]
 pipeline_stage=snakemake.params[1]
 treeshrink_mode=snakemake.params[2]
@@ -16,5 +17,6 @@ outdir=os.path.dirname(snakemake.output[0])
 ## Run TreeShrink
 #run_treeshrink.py -t {input.treefile} -m "per-gene" -o {output.removed_taxa_dir}
 sp.run(['run_treeshrink.py', '-t', snakemake.input[0], '-m', treeshrink_mode,
-        '-o', outdir])
+        '-o', outdir], stdout=logf, stderr=logf)
+logf.close()
     

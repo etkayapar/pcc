@@ -1,8 +1,8 @@
 library(ape)
 args = commandArgs(trailingOnly=TRUE)
-## args = c(0.03, 0.55,
-##          "../output/before_trimal/outlier_detection/saved_genes_removed_taxa/output.treefile",
-##          "../output/before_trimal/outlier_detection/all_genes_names.txt",
+## args = c(0.08, 0.55,
+##          "../output/after_trimal/outlier_detection/saved_genes_removed_taxa/output.treefile",
+##          "../output/after_trimal/outlier_detection/all_genes_names.txt",
 ##          "./tmp_output")
 print(args)
 threshold = args[1]
@@ -65,7 +65,8 @@ gene_trees = read.tree(trees_file)
 gene_names = scan(gene_names_file, what=character())
 #setwd(output_dir)
 
-max_n_tax = max(sapply(gene_trees, function(x){length(x$tip.label)}))
+#max_n_tax = max(sapply(gene_trees, function(x){length(x$tip.label)}))
+max_n_tax = length(unique(unlist(sapply(gene_trees, function(x){return(x$tip.label)}))))
 
 ### Calculating the relative length of the longest branch ----
 prop_max = sapply(gene_trees, prop.max.f)
@@ -76,8 +77,7 @@ prop_tax = sapply(gene_trees, function(x){length(x$tip.label)/max_n_tax})
 names(prop_tax) = gene_names
 ### Filtering and processing trees according to defined thresholds ----
 
-long_branch_genes = prop_max[prop_max > threshold]
-long_branch_enough_taxa_genes = names(prop_max[prop_max > threshold & prop_tax >= tax_threshold])
+long_branch_enough_taxa_genes = names(prop_max[prop_max > threshold])
 
 #### Running tree splitting function on suitable genes -----
 
@@ -119,20 +119,6 @@ dev.off()
 if(length(saved_trees) !=0) {
     saved_genes = names(saved_trees)[sapply(saved_trees, function(x){!is.null(x)})]
 }
-
-outlier_genes = names(prop_max[prop_max > threshold | prop_tax < tax_threshold])
-
-if(length(saved_trees) !=0) {
-    outlier_genes = setdiff(outlier_genes, saved_genes)
-}
-
-pdf(paste(output_dir,"outlier_genes.pdf", sep="/"),30,30)
-par(mfrow=c(5,5))
-sapply(outlier_genes, function(X){
-    plot(gene_trees[[X]], main=X)
-})
-dev.off()
-write(outlier_genes, file = paste(output_dir,"outlier_genes.txt", sep="/"),sep='\n')
 
 #### Write out kept taxa for saved genes ------
     out.dir = output_dir

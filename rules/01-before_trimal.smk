@@ -55,6 +55,8 @@ rule run_treeshrink_before_trimal:
         gene_names="output/before_trimal/outlier_detection/all_genes_names.txt"
     output:
         treeshrink_output="output/before_trimal/outlier_detection/saved_genes_removed_taxa/output.treefile"
+    log:
+        workflow.basedir+"/logs/before_trimal/run_treeshrink.log"
     conda:
         "../envs/treeshrink.yaml"
     params:
@@ -72,6 +74,8 @@ rule detect_outliers_before_trimal:
         treeshrink_output=rules.run_treeshrink_before_trimal.output.treeshrink_output
     output:
         outlier_genes_list="output/before_trimal/outlier_detection/outlier_genes.txt",
+    log:
+        workflow.basedir+"/logs/before_trimal/detect_outliers.log"
     conda:
         "../envs/detect_outliers.yaml"
     params:

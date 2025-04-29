@@ -9,5 +9,5 @@ params:
         min_aln_len: 0
     detect_outliers:
         taxa_threshold: 0.7
-        long_branch_threshold: 0.03
+        long_branch_threshold: 0.08
         treeshrink_mode: "auto"

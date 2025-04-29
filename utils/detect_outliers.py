@@ -3,9 +3,29 @@ Python version of the detect_outliers_before_trimal and
 detect_outliers_after_trimal rules
 """
 
-import os
+import sys,os
 import subprocess as sp
+import logging, traceback
 
+# Logging setup --------
+logging.basicConfig(filename=snakemake.log[0],
+                    level=logging.INFO,
+                    format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    )
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    logger.error(''.join(["Uncaught exception: ",
+                         *traceback.format_exception(exc_type, exc_value, exc_traceback)
+                         ])
+                 )
+# Install exception handler
+sys.excepthook = handle_exception
+# --------------
 taxon_threshold=snakemake.params[0]
 pipeline_stage=snakemake.params[1]
 treeshrink_mode=snakemake.params[2]
@@ -44,7 +64,7 @@ for gene,genename in enumerate(genenames):
     original_ntax = len([x for x in fasta if x.startswith(">")])
     new_ntax = original_ntax - len(this_gene_removed_taxa)
     taxon_retaining_pct = new_ntax / original_ntax * 100
-    print(f"{genename}\t{original_ntax}\t{new_ntax}\t{round(taxon_retaining_pct,2)}")
+    logger.info(f"{genename}\t{original_ntax}\t{new_ntax}\t{round(taxon_retaining_pct,2)}")
     if taxon_retaining_pct == 100:
         continue
     if taxon_retaining_pct != 0 and taxon_retaining_pct >= taxon_threshold:
