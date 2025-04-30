@@ -10,8 +10,7 @@ import logging, traceback
 # Logging setup --------
 logging.basicConfig(filename=snakemake.log[0],
                     level=logging.INFO,
-                    format='%(asctime)s %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S',
+                    format='%(message)s'
                     )
 
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -35,8 +34,6 @@ treeshrink_output_trees_path=snakemake.input[2]
 gene_names_path=snakemake.input[1]
 outdir=os.path.dirname(treeshrink_output_trees_path)
 
-## Touch
-open(snakemake.output[0],'a').close()
 
 ## Calc ngenes
 with open(snakemake.input[1], 'r') as f:
@@ -50,31 +47,36 @@ sp.run(['Rscript', r_script_path, str(long_branch_threshold),
         "0.55", treeshrink_output_trees_path,
         gene_names_path, outdir])
 
-for gene,genename in enumerate(genenames):
-    outlier_genes_path = snakemake.output[0]
-    outlier_genes_file = open(outlier_genes_path, "w")
-    additional_removed_taxa_path = os.path.join(outdir, genename+"_removed_taxa_r.txt")
-    if os.path.exists(additional_removed_taxa_path):
-        with open(additional_removed_taxa_path, "r") as f:
-            additional_taxa = [x.strip() for x in f.readlines()]
-        removed_taxa[gene].extend(additional_taxa)
-    this_gene_removed_taxa = removed_taxa[gene]
-    with open(f"output/{pipeline_stage}/gene_tree_input/{genename}.fa") as f:
-        fasta = f.readlines()
-    original_ntax = len([x for x in fasta if x.startswith(">")])
-    new_ntax = original_ntax - len(this_gene_removed_taxa)
-    taxon_retaining_pct = new_ntax / original_ntax * 100
-    logger.info(f"{genename}\t{original_ntax}\t{new_ntax}\t{round(taxon_retaining_pct,2)}")
-    if taxon_retaining_pct == 100:
-        continue
-    if taxon_retaining_pct != 0 and taxon_retaining_pct >= taxon_threshold:
-        with open(os.path.join(outdir, f"{genename}_removed_taxa.txt"), 'w') as f:
-            for taxon in this_gene_removed_taxa:
-                f.write(taxon+'\n')
-    else:
-        outlier_genes_file.write(genename+'\n')
+logger.info("genename\toriginal_ntax\tnew_ntax\tpct_retained_taxa")
+outlier_genes_path = snakemake.output[0]
+with open(outlier_genes_path, "w") as outlier_genes_file:
+    for gene,genename in enumerate(genenames):
+        additional_removed_taxa_path = os.path.join(outdir, genename+"_removed_taxa_r.txt")
+        if os.path.exists(additional_removed_taxa_path):
+            with open(additional_removed_taxa_path, "r") as f:
+                additional_taxa = [x.strip() for x in f.readlines()]
+            removed_taxa[gene].extend(additional_taxa)
+        this_gene_removed_taxa = removed_taxa[gene]
+        with open(f"output/{pipeline_stage}/gene_tree_input/{genename}.fa") as f:
+            fasta = f.readlines()
+        original_ntax = len([x for x in fasta if x.startswith(">")])
+        new_ntax = original_ntax - len(this_gene_removed_taxa)
+        taxon_retaining_pct = new_ntax / original_ntax
+        logger.info(f"{genename}\t{original_ntax}\t{new_ntax}\t{round(taxon_retaining_pct,2)}")
+        # if genename=="10145at7088":
+        #     breakpoint()
+        if taxon_retaining_pct == 1:
+            continue
+        if taxon_retaining_pct != 0 and taxon_retaining_pct >= taxon_threshold:
+            with open(os.path.join(outdir, f"{genename}_removed_taxa.txt"), 'w') as f:
+                for taxon in this_gene_removed_taxa:
+                    f.write(taxon+'\n')
+        else:
+            outlier_genes_file.write(genename+'\n')
 
-outlier_genes_file.close()
                 
     
-        
+## Touch
+if not os.path.exists(outlier_genes_path):
+    print("No outlier_genes.txt was generated naturally")
+    open(snakemake.output[0],'a').close()

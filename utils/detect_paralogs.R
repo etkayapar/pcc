@@ -4,7 +4,7 @@ args = commandArgs(trailingOnly=TRUE)
 ##          "../output/after_trimal/outlier_detection/saved_genes_removed_taxa/output.treefile",
 ##          "../output/after_trimal/outlier_detection/all_genes_names.txt",
 ##          "./tmp_output")
-print(args)
+#print(args)
 threshold = args[1]
 tax_threshold = args[2]
 trees_file = args[3] ## Should point to gene_trees file output by TreeShrink
@@ -12,6 +12,9 @@ gene_names_file = args[4]
 output_dir=args[5]
 
 ## Functions ------
+is_dummy_tree = function(tree){
+    return(Ntip(tree) == 1 && tree$tip.label[1] == "")
+}
 get_internal_relbrlens = function(tree){
     relbrlens = tree$edge.length / sum(tree$edge.length)
     internalbr_ids = which(tree$edge[,2] > Ntip(tree))
@@ -56,7 +59,7 @@ split_trees = function(tree, retain_threshold=0.9, prop_max_threshold=0.1){
         cat("splitting rootwards...")
         return(split_trees(rootwards_split, prop_max_threshold = prop_max_threshold))
     }else{
-        return(NULL)
+        return(read.tree(text="();"))
     }
 }
 
@@ -86,10 +89,10 @@ saved_trees = lapply(long_branch_enough_taxa_genes, function(gene){
     this_tree_saved = split_trees(this_tree, retain_threshold = tax_threshold, prop_max_threshold = threshold)
     if(!is.null(this_tree_saved)){
         message(paste(gene, "saved"))
-        if(Ntip(this_tree_saved)/Ntip(this_tree) < tax_threshold){
-            message(paste(gene, "saved but has not enough taxa"))
-            this_tree_saved = NULL
-        }
+        ## if(Ntip(this_tree_saved)/Ntip(this_tree) < tax_threshold){
+        ##     message(paste(gene, "saved but has not enough taxa"))
+        ##     this_tree_saved = NULL
+        ## }
     }
     return(this_tree_saved)
 })
@@ -98,14 +101,14 @@ saved_trees = lapply(long_branch_enough_taxa_genes, function(gene){
 names(saved_trees) = long_branch_enough_taxa_genes
 pdf(paste(output_dir,"saved_genes.pdf", sep="/"), 40,20)
 if(length(saved_trees) !=0) {
-    print(str(saved_trees))
-    print(summary(saved_trees))
+    ## print(str(saved_trees))
+    ## print(summary(saved_trees))
     par(mfrow=c(1,2))
     sapply(names(saved_trees), function(gene){
         orig_tree = gene_trees[[gene]]
         saved_tree = saved_trees[[gene]]
         plot(orig_tree, cex=0.5, main=gene)
-        if(is.null(saved_tree)){
+        if(is_dummy_tree(saved_tree)){
             plot.new()
         }else{
             plot(saved_tree, cex=0.5, main=paste(gene,"_saved", sep=""))
