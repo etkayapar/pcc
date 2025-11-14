@@ -8,19 +8,40 @@ rule init_after_trimal:
         utils/phylo_scripts/cleanAllGaps {input} > {output}
         """
 
-rule detect_outliers_after_trimal:
+rule run_treeshrink_after_trimal:
     input:
         treefile="output/after_trimal/outlier_detection/all_genes.treefile",
         gene_names="output/after_trimal/outlier_detection/all_genes_names.txt"
     output:
-        outlier_genes_list="output/after_trimal/outlier_detection/outlier_genes.txt",
-        removed_taxa_dir=directory("output/after_trimal/outlier_detection/saved_genes_removed_taxa")
+        treeshrink_output="output/after_trimal/outlier_detection/saved_genes_removed_taxa/output.treefile"
+    log:
+        workflow.basedir+"/logs/after_trimal/run_treeshrink.log"
     conda:
         "../envs/treeshrink.yaml"
     params:
         taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"],
         pipeline_stage="after_trimal",
-        treeshrink_mode=config["params"]["detect_outliers"]["treeshrink_mode"]
+        treeshrink_mode=config["params"]["detect_outliers"]["treeshrink_mode"],
+        long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"]
+    script:
+        "../utils/detect_outliers_treeshrink.py"
+
+rule detect_outliers_after_trimal:
+    input:
+        treefile="output/after_trimal/outlier_detection/all_genes.treefile",
+        gene_names="output/after_trimal/outlier_detection/all_genes_names.txt",
+        treeshrink_output=rules.run_treeshrink_after_trimal.output.treeshrink_output
+    output:
+        outlier_genes_list="output/after_trimal/outlier_detection/outlier_genes.txt",
+    log:
+        workflow.basedir+"/logs/after_trimal/detect_outliers.log"
+    conda:
+        "../envs/detect_outliers.yaml"
+    params:
+        taxa_threshold=config["params"]["detect_outliers"]["taxa_threshold"],
+        pipeline_stage="after_trimal",
+        treeshrink_mode=config["params"]["detect_outliers"]["treeshrink_mode"],
+        long_branch_threshold=config["params"]["detect_outliers"]["long_branch_threshold"]
     script:
         "../utils/detect_outliers.py"
 

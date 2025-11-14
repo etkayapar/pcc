@@ -35,8 +35,9 @@ for stage in STAGES:
         name: f"unalign_outliers_{stage}"
         input:
             nt=f"output/{stage}/outlier_detection/final_output/{{gene}}.fa",
-            scr_path="utils/phylo_scripts/unalignFasta.awk",
-            tra_path="utils/phylo_scripts/translate_stdin.py"
+            unaln_scr_path="utils/phylo_scripts/unalignFasta.awk",
+            tra_path="utils/phylo_scripts/translate_stdin.py",
+            gaps_scr_path="utils/phylo_scripts/cleanAllGaps"
         output:
             nt_unaligned=f"output/{stage}/outlier_detection/realignment/{{gene}}.fa",
             aa_unaligned=f"output/{stage}/outlier_detection/realignment/{{gene}}.faa"
@@ -44,9 +45,11 @@ for stage in STAGES:
             gene="[A-Za-z0-9]+"
         conda:
             "../envs/phylo_scripts_python.yaml"
+        params:
+            maxgap_pct=config["params"]["general"]["maxgap_pct"]
         shell:
             """
-            {input.scr_path} {input.nt} > {output.nt_unaligned}
+            {input.gaps_scr_path} -v p={params.maxgap_pct} {input.nt} | {input.unaln_scr_path}  > {output.nt_unaligned}
             cat {output.nt_unaligned} | {input.tra_path}  > {output.aa_unaligned}
             """
     rule:
