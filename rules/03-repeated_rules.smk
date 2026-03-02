@@ -66,5 +66,5 @@ for stage in STAGES:
         threads: 4
         shell:
             """
-            linsi --thread {threads} {input.aa} > {output.aa_aln}
+            linsi --thread {threads} --threadit 0 {input.aa} > {output.aa_aln}
             """

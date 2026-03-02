@@ -22,7 +22,7 @@ rule align_aa:
     conda:
         "../envs/mafft.yaml"
     shell:
-        "linsi --thread {threads} {input} > {output}"
+        "linsi --thread {threads} --threadit 0 {input} > {output}"
 
 rule backtranslate:
     input:
