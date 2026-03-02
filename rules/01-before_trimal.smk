@@ -4,7 +4,8 @@ rule init_before_trimal:
         aa="input/genewise_fastas/{gene}.faa"
     output:
         out_nt="output/before_trimal/genewise_fastas/{gene}.fa",
-        out_aa="output/before_trimal/genewise_fastas/{gene}.faa"
+        out_aa="output/before_trimal/genewise_fastas/{gene}.faa",
+    group: "first_pass_align"
     shell:
         """
         ln -sr {input.nt} {output.out_nt}
@@ -17,6 +18,7 @@ rule align_aa:
     output:
         "output/before_trimal/mafft_output/{gene}_aligned.faa"
     threads: 4
+    group: "first_pass_align"
     conda:
         "../envs/mafft.yaml"
     shell:
@@ -31,6 +33,7 @@ rule backtranslate:
         "output/before_trimal/mafft_output/{gene}_aligned.fa"
     log:
         workflow.basedir+"/logs/before_trimal/backtranslate/{gene}_backtranslate.log"
+    group: "first_pass_align"
     conda:
         "../envs/phylo_scripts_python.yaml"
     shell:
@@ -45,6 +48,7 @@ rule clean_all_gap_seqs:
         "output/before_trimal/mafft_output/{gene}_aligned.fa"
     output:
         "output/before_trimal/gene_tree_input/{gene}.fa"
+    group: "first_pass_align"
     shell:
         "utils/phylo_scripts/cleanAllGaps {input} > {output}"
 
@@ -127,6 +131,7 @@ rule run_trimal:
         nt_aln="output/before_trimal/outlier_detection/realignment/{gene}_aligned.fa"
     conda:
         "../envs/mafft.yaml"
+    group: "realign_before_trimal"
     shell:
         """
         trimal -in {input.aa_aln} -out /dev/null -automated1 -colnumbering > {output.trimal_cols}

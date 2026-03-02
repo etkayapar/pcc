@@ -3,6 +3,7 @@ rule init_after_trimal:
         "output/before_trimal/outlier_detection/realignment/{gene}_aligned.fa"
     output:
         "output/after_trimal/gene_tree_input/{gene}.fa"
+    group: "realign_before_trimal"
     shell:
         """
         utils/phylo_scripts/cleanAllGaps {input} > {output}
@@ -85,6 +86,7 @@ rule backtranslate_final:
         nt_aln="output/after_trimal/outlier_detection/realignment/{gene}_aligned.fa"
     log:
         workflow.basedir+"/logs/after_trimal/backtranslate_final/{gene}_backtranslate.log"
+    group: "realign_after_trimal"
     conda:
         "../envs/phylo_scripts_python.yaml"
     shell:
