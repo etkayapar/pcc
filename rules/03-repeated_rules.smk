@@ -10,12 +10,13 @@ for stage in STAGES:
         threads: 4
         conda:
             "../envs/iqtree.yaml"
+        params:
+            prefix=f"output/{stage}/gene_trees/{{gene}}/{{gene}}"
         shell:
             """
             iqtree2 -s {input} \
                     -m MFP -mset GTR -mrate I+R \
-                    -T {threads} --prefix {wildcards.gene} -st DNA --keep-ident
-            mv {wildcards.gene}.* {output.treedir}/
+                    -T {threads} --prefix {params.prefix} -st DNA --keep-ident
             """
     rule:
         name: f"collect_gene_trees_{stage}"
