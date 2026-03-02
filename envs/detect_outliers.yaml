@@ -1,8 +1,7 @@
 channels:
     - conda-forge
-    - r
     - bioconda
 dependencies:
+    - r-phytools =2.5_2
+    - r-ape =5.8_1
     - coreutils
-    - r-phytools
-    - r-ape

@@ -1,6 +1,6 @@
 channels:
-    - bioconda
     - conda-forge
+    - bioconda
 dependencies:
     - iqtree =2.3
     - coreutils

@@ -1,8 +1,8 @@
 channels:
-    - bioconda
     - conda-forge
+    - bioconda
 dependencies:
-    - mafft
-    - trimal
-    - biopython=1.83
+    - mafft =7.525
+    - trimal =1.5.1
+    - biopython =1.83
     - coreutils
