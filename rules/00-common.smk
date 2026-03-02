@@ -12,6 +12,11 @@ def get_gene_list_to_infer_tree_after(wildcards):
 
     return genes_list
 
+def get_filtered_genes_after_first_pass(wildcards):
+    with checkpoints.process_outliers_before_trimal.get(**wildcards).output[0].open() as f:
+        genes = [line.strip() for line in f]
+    return genes
+
 def get_gene_list_to_concatenate(wildcards):
     gene_tree_dir = checkpoints.process_outliers_after_trimal.get(**wildcards).output[1]
     genes_list = expand("output/after_trimal/outlier_detection/realignment/{gene}_aligned.fa",gene=glob_wildcards(os.path.join(gene_tree_dir, '{gene}.fa')).gene)

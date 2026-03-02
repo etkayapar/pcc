@@ -59,7 +59,8 @@ rule run_treeshrink_before_trimal:
         treefile="output/before_trimal/outlier_detection/all_genes.treefile",
         gene_names="output/before_trimal/outlier_detection/all_genes_names.txt"
     output:
-        treeshrink_output="output/before_trimal/outlier_detection/saved_genes_removed_taxa/output.treefile"
+        treeshrink_output="output/before_trimal/outlier_detection/saved_genes_removed_taxa/output.treefile",
+        treeshrink_dir=directory("output/before_trimal/outlier_detection/saved_genes_removed_taxa"),
     log:
         workflow.basedir+"/logs/before_trimal/run_treeshrink.log"
     conda:
@@ -94,30 +95,30 @@ rule detect_outliers_before_trimal:
         
 checkpoint process_outliers_before_trimal:
     input:
-        aln_dir="output/before_trimal/gene_tree_input",
-        remove_taxa_path="utils/phylo_scripts/remove_taxa.awk"
+        fastas=expand("output/before_trimal/gene_tree_input/{gene}.fa", gene=genes),
+        treeshrink_dir=rules.run_treeshrink_before_trimal.output.treeshrink_dir,
+        remove_taxa_path="utils/phylo_scripts/remove_taxa.awk",
+        outlier_genes="output/before_trimal/outlier_detection/outlier_genes.txt"
     output:
         genelist="output/before_trimal/outlier_detection/final_output/genelist.txt",
         d=directory("output/before_trimal/outlier_detection/final_output")
-    params:
-        outlier_genes_path="output/before_trimal/outlier_detection/outlier_genes.txt"
     log:
         workflow.basedir+"/logs/before_trimal/process_outliers.log"
     shell:
-        """
+        r"""
         set +o pipefail
-        (for gene in `ls {input.aln_dir}/ | grep -E ".*\.fa$" | cut -d. -f 1`
-        do
+        (for fasta in {input.fastas}; do
+            gene=$(basename $fasta .fa)
             removed_taxa_path="output/before_trimal/outlier_detection/saved_genes_removed_taxa/${{gene}}_removed_taxa.txt"
             if [[ -f $removed_taxa_path ]]
             then
-            {input.remove_taxa_path} -v taxafile=${{removed_taxa_path}} {input.aln_dir}/${{gene}}.fa > {output.d}/${{gene}}.fa
+            {input.remove_taxa_path} -v taxafile=${{removed_taxa_path}} $fasta > {output.d}/${{gene}}.fa
             echo ${{gene}} >> {output.genelist}
-            elif grep -qw ${{gene}} {params.outlier_genes_path}
+            elif grep -qw ${{gene}} {input.outlier_genes}
             then
             true
             else
-            ln -sr {input.aln_dir}/${{gene}}.fa {output.d}
+            ln -sr $fasta {output.d}
             echo ${{gene}} >> {output.genelist}
             fi
         done) 2>{log}
