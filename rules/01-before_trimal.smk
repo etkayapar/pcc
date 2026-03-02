@@ -30,7 +30,8 @@ rule backtranslate:
         aa_msa="output/before_trimal/mafft_output/{gene}_aligned.faa",
         pal2nal_path=workflow.basedir+"/utils/extract-buscos/pal2nal.py"
     output:
-        "output/before_trimal/mafft_output/{gene}_aligned.fa"
+        "output/before_trimal/mafft_output/{gene}_aligned.fa",
+        "output/before_trimal/mafft_output/{gene}.fa",
     log:
         workflow.basedir+"/logs/before_trimal/backtranslate/{gene}_backtranslate.log"
     group: "first_pass_align"
