@@ -12,4 +12,4 @@ params:
         treeshrink_mode: "auto"
     final_gene_trees:
         model: "MFP"
-        branch_support_args: "-B 1000"
+        branch_support_args: "-B 1000 -alrt 1000 -bnni"
