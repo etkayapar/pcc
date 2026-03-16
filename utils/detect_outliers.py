@@ -57,14 +57,13 @@ with open(outlier_genes_path, "w") as outlier_genes_file:
                 additional_taxa = [x.strip() for x in f.readlines()]
             removed_taxa[gene].extend(additional_taxa)
         this_gene_removed_taxa = removed_taxa[gene]
-        with open(f"output/{pipeline_stage}/gene_tree_input/{genename}.fa") as f:
-            fasta = f.readlines()
-        original_ntax = len([x for x in fasta if x.startswith(">")])
+        args = ['sed', f"{gene+1}q;d", f"output/{pipeline_stage}/outlier_detection/all_genes.treefile"]
+        gt=sp.run(args, capture_output=True, text=True)
+        args2 = ['R', '--slave', '-e', 'ttext=readLines(file("stdin"));cat(ape::Ntip(ape::read.tree(text=ttext)))']
+        original_ntax = int(sp.run(args2, input=gt.stdout, capture_output=True, text=True).stdout)
         new_ntax = original_ntax - len(this_gene_removed_taxa)
         taxon_retaining_pct = new_ntax / original_ntax
         logger.info(f"{genename}\t{original_ntax}\t{new_ntax}\t{round(taxon_retaining_pct,2)}")
-        # if genename=="10145at7088":
-        #     breakpoint()
         if taxon_retaining_pct == 1:
             continue
         if taxon_retaining_pct != 0 and taxon_retaining_pct >= taxon_threshold:
