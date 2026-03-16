@@ -1,3 +1,5 @@
+containerized: "docker://ghcr.io/zjnolen/pcc:0.1.0"
+
 include: "rules/00-common.smk"
 include: "rules/01-before_trimal.smk"
 include: "rules/02-after_trimal.smk"
