@@ -10,3 +10,6 @@ params:
         taxa_threshold: 0.7
         long_branch_threshold: 0.08
         treeshrink_mode: "auto"
+    final_gene_trees:
+        model: "MFP"
+        branch_support_args: "-B 1000"

@@ -147,3 +147,24 @@ rule concatenate:
         mv supermatrix.{{phy,nex}} output/
         fi
         """
+
+rule final_gene_trees:
+    input:
+        fasta="output/after_trimal/outlier_detection/realignment/{gene}_aligned.fa",
+    output:
+        treefile="output/final_gene_trees/{gene}/{gene}.treefile",
+        treedir=directory("output/final_gene_trees/{gene}")
+    threads: 4
+    conda:
+        "../envs/iqtree.yaml"
+    params:
+        prefix="output/final_gene_trees/{gene}/{gene}",
+        model=config["params"]["final_gene_trees"]["model"],
+        support=config["params"]["final_gene_trees"]["branch_support_args"], 
+    shell:
+        """
+        iqtree2 -s {input.fasta} -st DNA \
+            -m {params.model} -T {threads} {params.support} \
+            --prefix {params.prefix}
+        """
+            

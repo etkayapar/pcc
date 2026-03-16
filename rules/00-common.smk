@@ -23,3 +23,7 @@ def get_gene_list_to_concatenate(wildcards):
 
     return genes_list
 
+def get_filtered_genes_final(wildcards):
+    with checkpoints.process_outliers_after_trimal.get(**wildcards).output[0].open() as f:
+        genes = [line.strip() for line in f]
+    return genes

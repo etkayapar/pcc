@@ -17,3 +17,12 @@ rule second_pass:
 rule conclude:
     input:
         "output/supermatrix.phy"
+
+rule conclude_with_gene_trees:
+    input:
+        "output/supermatrix.phy",
+        expand(
+            "output/final_gene_trees/{gene}/{gene}.treefile",
+            gene=get_filtered_genes_final
+        ),
+        
