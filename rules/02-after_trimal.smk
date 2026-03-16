@@ -164,7 +164,7 @@ rule final_gene_trees:
     shell:
         """
         iqtree2 -s {input.fasta} -st DNA \
-            -m {params.model} -T {threads} {params.support} \
-            --prefix {params.prefix}
+            -m {params.model} -T {threads} --prefix {params.prefix} \
+            {params.support}
         """
             
