@@ -1,0 +1,16 @@
+restart-times: 0 # how many retries to give a step if it fails
+local-cores: 2 # how many cores to let the snakemake command use outside of jobs (for fast steps like file linking)
+printshellcmds: true
+sdm: "conda apptainer" # change to just conda if you are not using apptainer/singularity
+jobs: 999 # how many jobs to submitted/running in the SLURM queue at once
+keep-going: true
+max-threads: 48 # maximum threads/cpus available on the nodes you submit to
+max-jobs-per-timespan: "1/1s" # submit only 1 job per second to not overwhelm the queue
+apptainer-args: "" # add any special arguments for apptainer/singularity that you need to have on your system to run containers
+executor: "slurm"
+default-resources:
+  - "mem_mb=(threads*5300)" # set to how many MB of memory per core you have available on your system
+  - "runtime=60m" # leave as is, the rules will ask for more if they need them (up to 4)
+  - "slurm_account=account" # replace with your slurm account (i.e. #SBATCH -A/--account)
+  - "slurm_partition=partition" # replace with your slurm partition to submit to (i.e. #SBATCH -p/--partition)
+# If you need to pass more info the the sbatch commands, see https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html#slurm-specific-resources for more options
