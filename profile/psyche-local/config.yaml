@@ -7,3 +7,28 @@ apptainer-args: "" # add any special arguments for apptainer/singularity that yo
 default-resources:
   - "mem_mb=(threads*5300)" # set to how many MB per core you have available on your system
   - "runtime=60m"
+
+# Some suggested resource settings are exposed below, change only if needed for your system
+
+# Determines the number of threads each step uses
+# Adjust to fit the needs of your system
+set-threads:
+  align_aa: 4
+  realign_outliers_before_trimal: 4
+  realign_outliers_after_trimal: 4
+
+# Determines rule specific resources (primarily
+# runtime, but also memory if needed). These
+# runtimes are maximums for submitted jobs, so
+# they should be high for the longest running
+set-resources:
+  align_aa:
+    runtime: "4d"
+  realign_outliers_before_trimal:
+    runtime: "4d"
+  realign_outliers_after_trimal:
+    runtime: "4d"
+  infer_gene_trees_before_trimal:
+    runtime: "4d"
+  infer_gene_trees_after_trimal:
+    runtime: "4d"

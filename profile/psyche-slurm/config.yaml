@@ -14,3 +14,28 @@ default-resources:
   - "slurm_account=account" # replace with your slurm account (i.e. #SBATCH -A/--account)
   - "slurm_partition=partition" # replace with your slurm partition to submit to (i.e. #SBATCH -p/--partition)
 # If you need to pass more info the the sbatch commands, see https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html#slurm-specific-resources for more options
+
+# Some suggested resource settings are exposed below, change only if needed for your system
+
+# Determines the number of threads each step uses
+# Adjust to fit the needs of your system
+set-threads:
+  align_aa: 4
+  realign_outliers_before_trimal: 4
+  realign_outliers_after_trimal: 4
+
+# Determines rule specific resources (primarily
+# runtime, but also memory if needed). These
+# runtimes are maximums for submitted jobs, so
+# they should be high for the longest running
+set-resources:
+  align_aa:
+    runtime: "4d"
+  realign_outliers_before_trimal:
+    runtime: "4d"
+  realign_outliers_after_trimal:
+    runtime: "4d"
+  infer_gene_trees_before_trimal:
+    runtime: "4d"
+  infer_gene_trees_after_trimal:
+    runtime: "4d"
