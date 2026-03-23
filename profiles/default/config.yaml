@@ -20,3 +20,5 @@ set-resources:
     runtime: "4d"
   infer_gene_trees_after_trimal:
     runtime: "4d"
+  final_gene_trees:
+    runtime: "4d"
