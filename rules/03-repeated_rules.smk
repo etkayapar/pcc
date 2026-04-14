@@ -42,7 +42,6 @@ for stage in STAGES:
         output:
             nt_unaligned=f"output/{stage}/outlier_detection/realignment/{{gene}}.fa",
             aa_unaligned=f"output/{stage}/outlier_detection/realignment/{{gene}}.faa"
-        group: f"realign_{stage}"
         wildcard_constraints:
             gene="[A-Za-z0-9]+"
         conda:
@@ -62,7 +61,6 @@ for stage in STAGES:
             aa_aln=f"output/{stage}/outlier_detection/realignment/{{gene}}_aligned.faa"
         conda:
             "../envs/mafft.yaml"
-        group: f"realign_{stage}"
         threads: 4
         shell:
             """

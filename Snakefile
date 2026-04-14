@@ -5,6 +5,8 @@ include: "rules/01-before_trimal.smk"
 include: "rules/02-after_trimal.smk"
 include: "rules/03-repeated_rules.smk"
 
+localrules: init_before_trimal,init_after_trimal,run_trimal,backtranslate,backtranslate_final,clean_all_gap_seqs,unalign_outliers_before_trimal,unalign_outliers_after_trimal
+
 ## Target rules for a disjunct, three-step workflow
 rule first_pass:
     input:
