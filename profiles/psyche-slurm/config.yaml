@@ -4,13 +4,13 @@ printshellcmds: true
 sdm: "conda apptainer" # change to just conda if you are not using apptainer/singularity
 jobs: 999 # how many jobs to submitted/running in the SLURM queue at once
 keep-going: true
-max-threads: 48 # maximum threads/cpus available on the nodes you submit to
-max-jobs-per-timespan: "1/1s" # submit only 1 job per second to not overwhelm the queue
-#apptainer-args: "" # add any special arguments for apptainer/singularity that you need to have on your system to run containers
+max-threads: 40 # maximum threads/cpus available on the nodes you submit to (40 if partition==small on CSC)
+max-jobs-per-second: 1 # submit only 1 job per second to not overwhelm the queue
+max-status-checks-per-second: 1
 executor: "slurm"
 default-resources:
-  - "mem_mb=(threads*5300)" # set to how many MB of memory per core you have available on your system
-  - "runtime=60m" # leave as is, the rules will ask for more if they need them (up to 4)
+  - "mem_mb=(threads*9200)" # Small partition has about 382000 MB memory X 40 cpus, so we can give up to 9500 MB per cpu
+  - "runtime=60m" # leave as is, the rules will ask for more if they need them (up to the value specified per rule in profiles/default/config.yaml)
   - "slurm_account=account" # replace with your slurm account (i.e. #SBATCH -A/--account)
-  - "slurm_partition=partition" # replace with your slurm partition to submit to (i.e. #SBATCH -p/--partition)
+  - "slurm_partition=small" # replace with your slurm partition to submit to (i.e. #SBATCH -p/--partition),
 # If you need to pass more info the the sbatch commands, see https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html#slurm-specific-resources for more options

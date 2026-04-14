@@ -11,14 +11,14 @@ set-threads:
 # they should be high for the longest running
 set-resources:
   align_aa:
-    runtime: "4d"
+    runtime: "3d"
   realign_outliers_before_trimal:
-    runtime: "4d"
+    runtime: "3d"
   realign_outliers_after_trimal:
-    runtime: "4d"
+    runtime: "3d"
   infer_gene_trees_before_trimal:
-    runtime: "4d"
+    runtime: "3d"
   infer_gene_trees_after_trimal:
-    runtime: "4d"
+    runtime: "3d"
   final_gene_trees:
-    runtime: "4d"
+    runtime: "3d"
