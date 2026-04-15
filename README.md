@@ -36,7 +36,7 @@ this should make all the changes go away but make them accessible later on if ne
 git switch psyche-csc
 ```
 
-Since conda is not directly available on the cluster you can use the provided container image that provides the conda environments and conda itself. Due to a bug in Snakemake, the container image needs to be pulled first before attempting it to run the workflow. To do so, you need to run the following command:
+Since conda is not directly available on the cluster you can use the provided container image that provides the conda environments and conda itself. Due to a bug in Snakemake, the container image needs to be pulled first before attempting it to run the workflow. To do so, you need to run the following command after loading the snakemake module provided by the cluster ( `ml load snakemake`)
 
 ```bash
 snakemake --sdm conda apptainer --conda-create-envs-only
@@ -95,7 +95,7 @@ Since this partition has a maximum 3-day runtime I gave all these rules that man
 
 For this I recommend starting a `tmux` or `screen` session on the login node you are now and try to remember which login front-end you are connected since you need to login back to this specific login node to be able to check on your running Snakemake process.
 
-Inside the tmux session load the snakemake module provided by your cluster
+Inside the tmux session load the snakemake module provided by your cluster, as before
 
 ```bash
 ml load snakemake
