@@ -30,7 +30,7 @@ If you see an error about conflicting or unsaved changes then it must be because
 git stash push
 ```
 
-this should make all the changes go away but make them accessible later on if needed (with the `git stash pop` command). After removing the changes, you need to switch to this new branch:
+this should make all the changes go away but make them accessible later on if needed (with the `git stash pop` command). After removing the changes and `git pull` ing, you need to switch to this new branch:
 
 ```bash
 git switch psyche-csc
@@ -71,7 +71,7 @@ It is a bit tedious to set up the profiles so that you are not over- or under-re
 
 But please do check the `.yaml` files under both `profiles/default` and `profiles/psyche-slurm` (the default and the slurm profiles hereafter) to make sure you have reasonable times and memory there. I tried to set them up so that it is at least somewhat reasonable for the `small` partition on puhti, so they may be plug and play for you except the missing SLURM account information you need to fill in in the `.yaml`  file for the slurm profile.
 
-Since the resource specifications in the default profile seems to override everything else, please make sure that you are not asking for more time than your partition allows. Below is the except form the default profile I set up for the `small` partition.
+Since the resource specifications in the default profile seems to override everything else, please make sure that you are not asking for more time than your partition allows. Below is the excerpt form the default profile I set up for the `small` partition.
 
 ```yaml
 set-resources:
@@ -90,11 +90,6 @@ set-resources:
 ```
 
 Since this partition has a maximum 3-day runtime I gave all these rules that many days.
-
-
-
-
-
 
 ### Start the pipeline
 
@@ -117,9 +112,9 @@ Note: For my last successful runs, I actually typed out the value I have for `$L
 
 ## Troubleshooting
 
-### I get a WorkflowError, but no sign of slurm in the screen log
+### I get a WorkflowError, but no sign of slurm log paths in the screen log
 
-This is usually because the executor was not even able to submit jobs because of invalid resource specifications. Please check that the time you are requesting for a job (in 1) `profiles/default/config.yaml` and 2) `profiles/psyche-slurm/config.yaml`) does not exceed the maximum time allowed for the partition you are submitting to, which can be changed from the file #2.
+This is usually because the executor was not even able to submit jobs because of invalid resource specifications. Please check that the time you are requesting for a job (in the default and the slurm profiles) does not exceed the maximum time allowed for the partition you are submitting to, which can be changed from the file #2.
 
 ### Conda is not found
 
