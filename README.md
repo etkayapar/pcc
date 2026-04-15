@@ -7,7 +7,7 @@
     - [Double-checking the profiles before attempting to run the pipeline](#double-checking-the-profiles-before-attempting-to-run-the-pipeline)
     - [Start the pipeline](#start-the-pipeline)
   - [Troubleshooting](#troubleshooting)
-    - [I get a WorkflowError, but no sign of slurm in the screen log](#i-get-a-workflowerror-but-no-sign-of-slurm-in-the-screen-log)
+    - [I get a WorkflowError, but no sign of slurm log paths in the screen log](#i-get-a-workflowerror-but-no-sign-of-slurm-log-paths-in-the-screen-log)
     - [Conda is not found](#conda-is-not-found)
 
 <!-- markdown-toc end -->
@@ -108,7 +108,7 @@ now we can start the pipeline:
 ```bash
 snakemake --sdm conda apptainer --profile profiles/psyche-slurm  --apptainer-args='--bind="/users,/projappl,/scratch,$TMPDIR,$LOCAL_SCRATCH"' --local-storage-prefix='"$LOCAL_SCRATCH"' --remote-job-local-storage-prefix='"$LOCAL_SCRATCH"'
 ```
-Note: For my last successful runs, I actually typed out the value I have for `$LOCAL_SCRATCH` instead of passing it by the variable (as I shown above). So you may try both if one does not work because of quotation or some other reason.
+Note: For my last successful runs, I actually typed out the value I have for `$LOCAL_SCRATCH` instead of passing it by the variable (as I shown above) for the two `storage-prefix=` arguments in the above command. So you may try both if one does not work because of quotation or some other reason.
 
 ## Troubleshooting
 
