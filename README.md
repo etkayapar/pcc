@@ -2,91 +2,126 @@
 **Table of Contents**
 
 - [PCC (Phylogenetic dataset Compiler Collection)](#pcc-phylogenetic-dataset-compiler-collection)
-    - [What do you need to use it](#what-do-you-need-to-use-it)
-    - [Explanation of the workflow](#explanation-of-the-workflow)
+  - [Psyche analysis instructions for the CSC puhti cluster](#psyche-analysis-instructions-for-the-csc-puhti-cluster)
+    - [Creating a fake `conda` command](#creating-a-fake-conda-command)
+    - [Double-checking the profiles before attempting to run the pipeline](#double-checking-the-profiles-before-attempting-to-run-the-pipeline)
+    - [Start the pipeline](#start-the-pipeline)
+  - [Troubleshooting](#troubleshooting)
+    - [I get a WorkflowError, but no sign of slurm in the screen log](#i-get-a-workflowerror-but-no-sign-of-slurm-in-the-screen-log)
+    - [Conda is not found](#conda-is-not-found)
 
 <!-- markdown-toc end -->
 
 # PCC (Phylogenetic dataset Compiler Collection)
 
-This is a simple and crudely made Snakemake workflow for compiling phylogenetic datasets from extracted coding sequences of **nuclear** (for now) protein-coding genes.
-It can work reasonably well with sequences retrieved by running BUSCO as input. There is very little flexibility as to the tools used for the different steps and the parameters as this mainly for my personal use at the moment. I plan to add new functionality (alternative tools for the same rules, or more options in the rules themselves) later.
+## Psyche analysis instructions for the CSC puhti cluster
 
-## What do you need to use it
-1. You need to have `snakemake`  and `GNU Coreutils` installed, both of which can be installed in a `conda` environment. I will add an `environment.yaml` for this workflow that will make things easier later.
+This branch includes some changes and a helper script to get the pipeline running with the snakemake SLURM executors for maximum parallel efficiency possible.
 
-2. Clone this repository recursively and cd into it
+First of all you should pull all the newest changes from upstream as this will give you the new branch specific for CSC:
 
-``` bash
-git clone --recursive https://github.com/etkayapar/pcc
-cd pcc
+```bash
+git pull
 ```
 
-3. You need to have all your input genes as fasta files in `input/genewise_fastas` (relative to the project root directory), and their names in a single-column (for now) `gene_table.tsv` file in the project root directory that looks like below.
+If you see an error about conflicting or unsaved changes then it must be because you have changed some files that are tracked by git. Could be the Snakefile, and the rule definitions under `rules/` or configs. If you made changes that you wish not to lose, you can copy the changed files to a different directory and then `git pull`, or you can safely stash away those changes with git:
 
-(First line is a header)
-```
-gene
-geneName1
-geneName2
+```bash
+git stash push
 ```
 
-assuming that you have the FASTA files in paths like:
+this should make all the changes go away but make them accessible later on if needed (with the `git stash pop` command). After removing the changes, you need to switch to this new branch:
 
-```
-input/genewise_fastas/geneName1.fa
-input/genewise_fastas/geneName2.fa
-```
-
-Gene names should not have any underscores or hyphens or any other breaking character (for now) they can only include alphanumeric characters (upper or lowercase letters are fine). FASTA files themselves are exptected to have the extension `.fa` and not any other common versions such has `.fna` or `.fasta`
-
-## Explanation of the workflow
-
-It is only possible to run it in three distinct steps with the target rules are named as `first_pass`, `second_pass`, and `conclude`.
-
-``` bash
-snakemake --sdm conda --cores <NUM_THREADS> first_pass
+```bash
+git switch psyche-csc
 ```
 
-![fig1](./figs/dag_first.png)
+Since conda is not directly available on the cluster you can use the provided container image that provides the conda environments and conda itself. Due to a bug in Snakemake, the container image needs to be pulled first before attempting it to run the workflow. To do so, you need to run the following command:
 
-Would do:
-  1. Align the translated gene sequences by `mafft` with the `L-INS-i` algorithm
-  2. Backtranslate the aligned amino-acid alignments into nucleotide alignments
-  3. Remove fasta entries from genes that consist of gaps entirely (Genes that had a header but no sequence in the input nucleotide fasta files)
-  4. Infer gene trees using IQ-TREE
-  5. Collect all gene trees into a single `.treefile`
-  6. Detect potential outlier sequences from gene trees using [TreeShrink](https://github.com/uym2/TreeShrink)
-  7. Remove sequences from gene alignment (or discard entire gene alignments) according to the output of the previous step.
-
-``` bash
-snakemake --sdm conda --cores <NUM_THREADS> second_pass
+```bash
+snakemake --sdm conda apptainer --conda-create-envs-only
 ```
 
-![fig2](./figs/dag_second.png)
+I tried running this step inside a SLURM job via a batch script but it failed to due to not having enough space on disk in the temporary directory, but running it inside the login node was successful.
 
-  8. Unalign the the processed gene alignment sequences that made the filtering step, translate into amino-acid sequences.
-  9. Realign the amino-acid sequences
-  10. Run `trimAl` with `--automated1` heuristic to mark candidate columns to retain after getting rid of gap-rich columns and backtranslate the amino-acid alignment to a nucleotide alignment while only keeping the columns deemed ok by `trimAl`.
-  11. Repeat steps 5-7 for the trimal-processed alignments.
+After pulling the container successfully, you should see a singularity/apptainer container image (`*.simg` file) somewhere in the `.snakemake/singularity/` directory under your working directory.
 
-``` bash
-snakemake --sdm conda --cores <NUM_THREADS> conclude
+### Creating a fake `conda` command
+
+We need to create a fake `conda` command that can provide information about the conda installation that exists inside the container image. I put a helper script to that in this branch:
+
+If you run the below command while still being in the top-level `pcc` directory,
+
+```bash
+utils/create_dummy_conda.sh auto
 ```
 
-![fig3](./figs/dag_conclude.png)
+It should create such a fake `conda` script that outputs a json string for snakemake to parse. There should be adequate information in the output of this above script to tell if it worked, but to explicity test if it worked try running:
 
-  12. Repeat steps 8,9 for the trimal-processed alignments.
-  13. Backtranslate the resulting amino-acid alignments.
-  14. Collect the final nucleotide alignments into a directory
-  15. run `concat-aln` to concatenate the genewise alignments into a supermatrix in `PHYLIP` format (`output/supermatrix.phy`) and also generate a partition table in the `NEXUS` format (`output/supermatrix.nex`)
-
-If you are sure that you don't want to supervise how to workflow executes in between the three steps explained above, you may try to run the entire workflow by using:
-
-``` bash
-snakemake --sdm conda --cores <NUM_THREADS> first_pass && \
-snakemake --sdm conda --cores <NUM_THREADS> second_pass && \
-snakemake --sdm conda --cores <NUM_THREADS> conclude
+```bash
+type conda
 ```
 
-This sequence of snakemake calls should run the three consecutive steps while running a given step only if the previous step was successfully executed.
+this should output a path that looks like `/users/USERNAME/.local/bin/conda`.
+
+
+### Double-checking the profiles before attempting to run the pipeline
+
+It is a bit tedious to set up the profiles so that you are not over- or under-requesting resources for the partition of your choice unfortunately...
+
+But please do check the `.yaml` files under both `profiles/default` and `profiles/psyche-slurm` (the default and the slurm profiles hereafter) to make sure you have reasonable times and memory there. I tried to set them up so that it is at least somewhat reasonable for the `small` partition on puhti, so they may be plug and play for you except the missing SLURM account information you need to fill in in the `.yaml`  file for the slurm profile.
+
+Since the resource specifications in the default profile seems to override everything else, please make sure that you are not asking for more time than your partition allows. Below is the except form the default profile I set up for the `small` partition.
+
+```yaml
+set-resources:
+  align_aa:
+    runtime: "3d"
+  realign_outliers_before_trimal:
+    runtime: "3d"
+  realign_outliers_after_trimal:
+    runtime: "3d"
+  infer_gene_trees_before_trimal:
+    runtime: "3d"
+  infer_gene_trees_after_trimal:
+    runtime: "3d"
+  final_gene_trees:
+    runtime: "3d"
+```
+
+Since this partition has a maximum 3-day runtime I gave all these rules that many days.
+
+
+
+
+
+
+### Start the pipeline
+
+For this I recommend starting a `tmux` or `screen` session on the login node you are now and try to remember which login front-end you are connected since you need to login back to this specific login node to be able to check on your running Snakemake process.
+
+Inside the tmux session load the snakemake module provided by your cluster
+
+```bash
+ml load snakemake
+```
+
+and make sure that you have the latest available snakemake module loaded.
+
+now we can start the pipeline:
+
+```bash
+snakemake --sdm conda apptainer --profile profiles/psyche-slurm  --apptainer-args='--bind="/users,/projappl,/scratch,$TMPDIR,$LOCAL_SCRATCH"' --local-storage-prefix='"$LOCAL_SCRATCH"' --remote-job-local-storage-prefix='"$LOCAL_SCRATCH"'
+```
+Note: For my last successful runs, I actually typed out the value I have for `$LOCAL_SCRATCH` instead of passing it by the variable (as I shown above). So you may try both if one does not work because of quotation or some other reason.
+
+## Troubleshooting
+
+### I get a WorkflowError, but no sign of slurm in the screen log
+
+This is usually because the executor was not even able to submit jobs because of invalid resource specifications. Please check that the time you are requesting for a job (in 1) `profiles/default/config.yaml` and 2) `profiles/psyche-slurm/config.yaml`) does not exceed the maximum time allowed for the partition you are submitting to, which can be changed from the file #2.
+
+### Conda is not found
+
+If your Snakemake process complains that it could not find conda then make sure that you successfully completed the fake conda [section](#creating-a-fake-conda-command)
+
