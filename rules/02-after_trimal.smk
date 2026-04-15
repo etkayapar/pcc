@@ -53,7 +53,7 @@ checkpoint process_outliers_after_trimal:
             gene=get_filtered_genes_after_first_pass
         ),
         treeshrink_dir=rules.run_treeshrink_after_trimal.output.treeshrink_dir,
-        remove_taxa_path="utils/phylo_scripts/remove_taxa.awk",
+        remove_taxa_path=workflow.source_path("utils/phylo_scripts/remove_taxa.awk"),
         outlier_genes="output/after_trimal/outlier_detection/outlier_genes.txt",
     output:
         genelist="output/after_trimal/outlier_detection/final_output/genelist.txt",
@@ -84,7 +84,7 @@ rule backtranslate_final:
     input:
         nt="output/after_trimal/outlier_detection/realignment/{gene}.fa",
         aa_msa="output/after_trimal/outlier_detection/realignment/{gene}_aligned.faa",
-        pal2nal_path=workflow.basedir+"/utils/extract-buscos/pal2nal.py"
+        pal2nal_path=workflow.source_path("utils/pal2nal.py")
     output:
         nt_aln="output/after_trimal/outlier_detection/realignment/{gene}_aligned.fa"
     log:
@@ -100,7 +100,7 @@ rule backtranslate_final:
 rule init_concatenate:
     input:
         genes=get_gene_list_to_concatenate,
-        get_aln_len="utils/phylo_scripts/get_aln_len.awk"
+        get_aln_len=workflow.source_path("utils/phylo_scripts/get_aln_len.awk")
     output:
         d=directory("output/genes_to_concat/"),
         okf="output/genes_to_concat/OK",
