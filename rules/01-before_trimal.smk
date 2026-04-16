@@ -26,7 +26,7 @@ rule backtranslate:
     input:
         nt="output/before_trimal/genewise_fastas/{gene}.fa",
         aa_msa="output/before_trimal/mafft_output/{gene}_aligned.faa",
-        pal2nal_path=workflow.source_path("utils/pal2nal.py")
+        pal2nal_path=workflow.source_path("../utils/pal2nal.py")
     output:
         "output/before_trimal/mafft_output/{gene}_aligned.fa",
         "output/before_trimal/mafft_output/{gene}.fa",
@@ -93,7 +93,7 @@ checkpoint process_outliers_before_trimal:
     input:
         fastas=expand("output/before_trimal/gene_tree_input/{gene}.fa", gene=genes),
         treeshrink_dir=rules.run_treeshrink_before_trimal.output.treeshrink_dir,
-        remove_taxa_path=workflow.source_path("utils/phylo_scripts/remove_taxa.awk"),
+        remove_taxa_path=workflow.source_path("../utils/phylo_scripts/remove_taxa.awk"),
         outlier_genes="output/before_trimal/outlier_detection/outlier_genes.txt"
     output:
         genelist="output/before_trimal/outlier_detection/final_output/genelist.txt",
@@ -123,7 +123,7 @@ checkpoint process_outliers_before_trimal:
 rule run_trimal:
     input:
         aa_aln="output/before_trimal/outlier_detection/realignment/{gene}_aligned.faa",
-        pal2nal_path=workflow.source_path("utils/pal2nal.py")
+        pal2nal_path=workflow.source_path("../utils/pal2nal.py")
     output:
         trimal_cols="output/before_trimal/outlier_detection/realignment/{gene}.trimal",
         nt_aln="output/before_trimal/outlier_detection/realignment/{gene}_aligned.fa"

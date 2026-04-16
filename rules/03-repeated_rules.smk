@@ -36,9 +36,9 @@ for stage in STAGES:
         name: f"unalign_outliers_{stage}"
         input:
             nt=f"output/{stage}/outlier_detection/final_output/{{gene}}.fa",
-            unaln_scr_path=workflow.source_path("utils/phylo_scripts/unalignFasta.awk"),
-            tra_path=workflow.source_path("utils/phylo_scripts/translate_stdin.py"),
-            gaps_scr_path=workflow.source_path("utils/phylo_scripts/cleanAllGaps")
+            unaln_scr_path=workflow.source_path("../utils/phylo_scripts/unalignFasta.awk"),
+            tra_path=workflow.source_path("../utils/phylo_scripts/translate_stdin.py"),
+            gaps_scr_path=workflow.source_path("../utils/phylo_scripts/cleanAllGaps")
         output:
             nt_unaligned=f"output/{stage}/outlier_detection/realignment/{{gene}}.fa",
             aa_unaligned=f"output/{stage}/outlier_detection/realignment/{{gene}}.faa"
