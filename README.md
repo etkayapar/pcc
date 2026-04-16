@@ -106,7 +106,7 @@ and make sure that you have the latest available snakemake module loaded.
 now we can start the pipeline:
 
 ```bash
-snakemake --sdm conda apptainer --profile profiles/psyche-slurm  --apptainer-args='--bind="/users,/projappl,/scratch,$TMPDIR,$LOCAL_SCRATCH"' --local-storage-prefix='"$LOCAL_SCRATCH"' --remote-job-local-storage-prefix='"$LOCAL_SCRATCH"'
+snakemake --sdm conda apptainer --profile profiles/psyche-slurm  --apptainer-args='--bind="/users,/projappl,/scratch,$TMPDIR,$LOCAL_SCRATCH"' --local-storage-prefix='"$LOCAL_SCRATCH"' --remote-job-local-storage-prefix='"$LOCAL_SCRATCH"' collect_gene_trees_before_trimal
 ```
 Note: For my last successful runs, I actually typed out the value I have for `$LOCAL_SCRATCH` instead of passing it by the variable (as I shown above) for the two `storage-prefix=` arguments in the above command. So you may try both if one does not work because of quotation or some other reason.
 
