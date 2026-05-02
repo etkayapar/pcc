@@ -15,7 +15,7 @@ rule align_aa:
     input:
         "output/before_trimal/genewise_fastas/{gene}.faa"
     output:
-        "output/before_trimal/mafft_output/{gene}_aligned.faa"
+        ensure("output/before_trimal/mafft_output/{gene}_aligned.faa", non_empty=True)
     threads: 4
     conda:
         "../envs/mafft.yaml"

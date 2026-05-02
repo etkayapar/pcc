@@ -58,7 +58,7 @@ for stage in STAGES:
         input:
             aa=f"output/{stage}/outlier_detection/realignment/{{gene}}.faa"
         output:
-            aa_aln=f"output/{stage}/outlier_detection/realignment/{{gene}}_aligned.faa"
+            aa_aln=ensure(f"output/{stage}/outlier_detection/realignment/{{gene}}_aligned.faa", non_empty=True)
         conda:
             "../envs/mafft.yaml"
         threads: 4
