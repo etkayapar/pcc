@@ -19,8 +19,10 @@ rule align_aa:
     threads: 4
     conda:
         "../envs/mafft.yaml"
+    params:
+        aligner=get_aln_params
     shell:
-        "linsi --thread {threads} --threadit 0 {input} > {output}"
+        "{params.aligner} --thread {threads} --threadit 0 {input} > {output}"
 
 rule backtranslate:
     input:

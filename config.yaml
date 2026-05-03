@@ -4,6 +4,12 @@ gene_table: gene_table.tsv
 params:
     general:
         maxgap_pct: 0.95
+    align_aa:
+      aligner: "auto" # or a hard-coded mafft command {mafft --maxiterate ..... | fftns | linsi | etc}
+      auto_criterion: "filesize" # or mafft, in which case we run "mafft --auto"
+      large_gene_threshold_mb: 10
+      small_gene_aligner: "linsi"
+      large_gene_aligner: "fftns"
     concatenate:
         min_aln_len: 0
     detect_outliers:

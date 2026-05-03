@@ -62,7 +62,9 @@ for stage in STAGES:
         conda:
             "../envs/mafft.yaml"
         threads: 4
+        params:
+            aligner=get_aln_params
         shell:
             """
-            linsi --thread {threads} --threadit 0 {input.aa} > {output.aa_aln}
+            {params.aligner} --thread {threads} --threadit 0 {input.aa} > {output.aa_aln}
             """

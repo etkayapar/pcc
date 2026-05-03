@@ -27,3 +27,18 @@ def get_filtered_genes_final(wildcards):
     with checkpoints.process_outliers_after_trimal.get(**wildcards).output[0].open() as f:
         genes = [line.strip() for line in f]
     return genes
+
+def get_aln_params(wildcards, input):
+    aligner = config["params"]["align_aa"]["aligner"]
+    if aligner != "auto":
+        return aligner
+    auto_criterion = config["params"]["align_aa"]["auto_criterion"]
+    if auto_criterion != "filesize":
+        if auto_criterion != "mafft":
+            raise ValueError("The 'auto_criterion' should be either 'mafft' or 'filesize'")
+        return "mafft --auto"
+    large_gene_threshold_mb = config["params"]["align_aa"]["large_gene_threshold_mb"]
+    small_gene_aligner = config["params"]["align_aa"]["small_gene_aligner"]
+    large_gene_aligner = config["params"]["align_aa"]["large_gene_aligner"]
+    file_size_mb = os.path.getsize(input[0]) / (1024 * 1024)
+    return large_gene_aligner if file_size_mb > large_gene_threshold_mb else small_gene_aligner
