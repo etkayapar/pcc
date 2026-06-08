@@ -5,11 +5,12 @@ params:
     general:
         maxgap_pct: 0.95
     align_aa:
-      aligner: "auto" # or a hard-coded mafft command {mafft --maxiterate ..... | fftns | linsi | etc}
-      auto_criterion: "filesize" # or mafft, in which case we run "mafft --auto"
-      large_gene_threshold_mb: 10
+      aligner: "fftns" ##harcode an alignment algo, or set it to "auto"
+      auto_criterion: "filesize" ##"filesize" or "mafft", in the latter case we run "mafft --auto"
+      large_gene_threshold_mb: 10 ##genes with filesize larger than this will use the 'large_gene_aligner'. The current and the next 2 lines are applicable only when aligner: "auto" and auto_criterion: "filesize"
       small_gene_aligner: "linsi"
       large_gene_aligner: "fftns"
+      mafft_tmpdir: "" ## Here you can provide a directory you create as the base-level alignment tmpdir. Leave empty unless you are facing TMPDIR related problems.
     concatenate:
         min_aln_len: 0
     detect_outliers:
