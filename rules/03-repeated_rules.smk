@@ -50,8 +50,8 @@ for stage in STAGES:
             maxgap_pct=config["params"]["general"]["maxgap_pct"]
         shell:
             """
-            {input.gaps_scr_path} -v p={params.maxgap_pct} {input.nt} | {input.unaln_scr_path}  > {output.nt_unaligned}
-            cat {output.nt_unaligned} | {input.tra_path}  > {output.aa_unaligned}
+            awk -f {input.gaps_scr_path} -v p={params.maxgap_pct} {input.nt} | awk -f {input.unaln_scr_path}  > {output.nt_unaligned}
+            cat {output.nt_unaligned} | python3 {input.tra_path}  > {output.aa_unaligned}
             """
     rule:
         name: f"realign_outliers_{stage}"
@@ -63,8 +63,22 @@ for stage in STAGES:
             "../envs/mafft.yaml"
         threads: 4
         params:
-            aligner=get_aln_params
+            aligner=get_aln_params,
+            mafft_tmpdir=config["params"]["align_aa"]["mafft_tmpdir"],
+            stage=stage
         shell:
             """
-            {params.aligner} --thread {threads} --threadit 0 {input.aa} > {output.aa_aln}
+            mafft_tmpdir={params.mafft_tmpdir}
+            if [[ -n ${{mafft_tmpdir}} ]]
+            then
+                mafft_tmpdir=${{mafft_tmpdir}}/realign_outliers_{params.stage}/{wildcards.gene}
+                mkdir -p $mafft_tmpdir
+            fi
+
+            MAFFT_TMPDIR=$mafft_tmpdir {params.aligner} --thread {threads} --threadit 0 {input.aa} > {output.aa_aln}
+
+            if [[ -n ${{mafft_tmpdir}} ]]
+            then
+                rm -rf ${{mafft_tmpdir}}
+            fi
             """

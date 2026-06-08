@@ -68,7 +68,7 @@ checkpoint process_outliers_after_trimal:
             removed_taxa_path="output/after_trimal/outlier_detection/saved_genes_removed_taxa/${{gene}}_removed_taxa.txt"
             if [[ -f $removed_taxa_path ]]
             then
-            {input.remove_taxa_path} -v taxafile=${{removed_taxa_path}} $fasta > {output.d}/${{gene}}.fa
+            awk -f {input.remove_taxa_path} -v taxafile=${{removed_taxa_path}} $fasta > {output.d}/${{gene}}.fa
             echo ${{gene}} >> {output.genelist}
             elif grep -qw ${{gene}} {input.outlier_genes}
             then
@@ -113,7 +113,7 @@ rule init_concatenate:
         touch {output.shortgenes}
         for gene in {input.genes}
         do
-            aln_len=$({input.get_aln_len} ${{gene}})
+            aln_len=$(awk -f {input.get_aln_len} ${{gene}})
             if [ $aln_len -ge {params.min_aln_len} ] 
             then
                 cp ${{gene}} {output.d}

@@ -20,9 +20,24 @@ rule align_aa:
     conda:
         "../envs/mafft.yaml"
     params:
-        aligner=get_aln_params
+        aligner=get_aln_params,
+        mafft_tmpdir=config["params"]["align_aa"]["mafft_tmpdir"]
     shell:
-        "{params.aligner} --thread {threads} --threadit 0 {input} > {output}"
+        """
+        mafft_tmpdir={params.mafft_tmpdir}
+        if [[ -n ${{mafft_tmpdir}} ]]
+        then
+            mafft_tmpdir=${{mafft_tmpdir}}/before_trimal_align_aa/{wildcards.gene}
+            mkdir -p $mafft_tmpdir
+        fi
+
+        MAFFT_TMPDIR=$mafft_tmpdir {params.aligner} --thread {threads} --threadit 0 {input} > {output}
+
+        if [[ -n ${{mafft_tmpdir}} ]]
+        then
+            rm -rf ${{mafft_tmpdir}}
+        fi
+        """
 
 rule backtranslate:
     input:
@@ -110,7 +125,7 @@ checkpoint process_outliers_before_trimal:
             removed_taxa_path="output/before_trimal/outlier_detection/saved_genes_removed_taxa/${{gene}}_removed_taxa.txt"
             if [[ -f $removed_taxa_path ]]
             then
-            {input.remove_taxa_path} -v taxafile=${{removed_taxa_path}} $fasta > {output.d}/${{gene}}.fa
+            awk -f {input.remove_taxa_path} -v taxafile=${{removed_taxa_path}} $fasta > {output.d}/${{gene}}.fa
             echo ${{gene}} >> {output.genelist}
             elif grep -qw ${{gene}} {input.outlier_genes}
             then
@@ -135,5 +150,5 @@ rule run_trimal:
         """
         trimal -in {input.aa_aln} -out /dev/null -automated1 -colnumbering > {output.trimal_cols}
         cd $(dirname {input.aa_aln})
-        {input.pal2nal_path} {wildcards.gene} 
+        python3 {input.pal2nal_path} {wildcards.gene}
         """
