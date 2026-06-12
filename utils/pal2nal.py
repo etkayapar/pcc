@@ -96,7 +96,7 @@ def parse_guidance(fname, threshold=0.93):
 
     return nucl_flanks
 
-def prot_to_codon(prot_alignment, codon_seqs, gap_char="-", codon_table="1"):
+def prot_to_codon(prot_alignment, codon_seqs, gap_char="-", codon_table="1", trim_last_stop_codon=False):
     """
     using a protein alignment and unaligned codon sequences,
     return the corresponding nucleotide alignment. This does
@@ -117,6 +117,12 @@ def prot_to_codon(prot_alignment, codon_seqs, gap_char="-", codon_table="1"):
 
         this_nucl = codon_seqs[this_desc].seq
         this_nucl_tra = this_nucl.upper().translate(table=codon_table)
+
+        if trim_last_stop_codon:
+            if str(this_nucl_tra[-1]) == "*":
+                this_nucl = this_nucl[:-1]
+                this_nucl_tra = this_nucl.upper().translate(table=codon_table)
+
         this_nucl = str(this_nucl)
 
         if this_nucl_tra != this_prot_n:
@@ -142,7 +148,7 @@ def prot_to_codon(prot_alignment, codon_seqs, gap_char="-", codon_table="1"):
 
     return MultipleSeqAlignment(nucl_records)
 
-def parse_alignment(gene, codon_table="1"):
+def parse_alignment(gene, codon_table="1", trim_last_stop_codon=False):
     """
     Parse the prot alignment, parse the unaligned codon fasta
     rebuild the codon alignment from them. Then, parse the
@@ -172,7 +178,7 @@ def parse_alignment(gene, codon_table="1"):
 
     prot_alignment = AlignIO.read(prot_alignment_fname, "fasta")
     nucl_seqs = SeqIO.to_dict(SeqIO.parse(nucl_unaligned_fname, "fasta"), key_function = lambda rec: rec.description)
-    codon_alignment = prot_to_codon(prot_alignment, nucl_seqs, codon_table=codon_table)
+    codon_alignment = prot_to_codon(prot_alignment, nucl_seqs, codon_table=codon_table, trim_last_stop_codon=trim_last_stop_codon)
 
     if os.path.exists(gblocks_output_fname) or os.path.exists(guidance_output_fname) or os.path.exists(trimal_output_fname):
         try:
@@ -181,7 +187,7 @@ def parse_alignment(gene, codon_table="1"):
             exit(1)
     else:
         clean_alignment = codon_alignment
-    
+
     clean_alignment.sort()
 
     return clean_alignment
@@ -220,8 +226,12 @@ def main():
         codon_table=sys.argv[2]
     except IndexError:
         codon_table=1
+    try:
+        trim_last_stop_codon=bool(sys.argv[3])
+    except IndexError:
+        trim_last_stop_codon=True
 
-    nucl_aln = parse_alignment(gene, codon_table)
+    nucl_aln = parse_alignment(gene, codon_table, trim_last_stop_codon)
 
     AlignIO.write(nucl_aln, gene+"_aligned.fa", "fasta-2line")
 
