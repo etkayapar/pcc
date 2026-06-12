@@ -31,7 +31,7 @@ rule align_aa:
             mkdir -p $mafft_tmpdir
         fi
 
-        MAFFT_TMPDIR=$mafft_tmpdir {params.aligner} --thread {threads} --threadit 0 {input} > {output}
+        MAFFT_TMPDIR=$mafft_tmpdir {params.aligner} --thread {threads} {input} > {output}
 
         if [[ -n ${{mafft_tmpdir}} ]]
         then

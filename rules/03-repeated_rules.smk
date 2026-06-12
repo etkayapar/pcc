@@ -75,7 +75,7 @@ for stage in STAGES:
                 mkdir -p $mafft_tmpdir
             fi
 
-            MAFFT_TMPDIR=$mafft_tmpdir {params.aligner} --thread {threads} --threadit 0 {input.aa} > {output.aa_aln}
+            MAFFT_TMPDIR=$mafft_tmpdir {params.aligner} --thread {threads} {input.aa} > {output.aa_aln}
 
             if [[ -n ${{mafft_tmpdir}} ]]
             then
