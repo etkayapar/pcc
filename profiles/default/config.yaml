@@ -2,8 +2,27 @@
 # Adjust to fit the needs of your system
 set-threads:
   align_aa: 4
+  infer_gene_trees_before_trimal: 4
   realign_outliers_before_trimal: 4
+  infer_gene_trees_after_trimal: 4
   realign_outliers_after_trimal: 4
+  final_gene_trees: 4
+
+# Put jobs in group to avoid short running slurm jobs
+groups:
+  - init_before_trimal=first_pass
+  - align_aa=first_pass
+  - backtranslate=first_pass
+  - clean_all_gap_seqs=first_pass
+  - infer_gene_trees_before_trimal=first_pass
+  - unalign_outliers_before_trimal=second_pass
+  - realign_outliers_before_trimal=second_pass
+  - run_trimal=second_pass
+  - init_after_trimal=second_pass
+  - infer_gene_trees_after_trimal=second_pass
+  - unalign_outliers_after_trimal=third_pass
+  - realign_outliers_after_trimal=third_pass
+  - backtranslate_final=third_pass
 
 # Determines rule specific resources (primarily
 # runtime, but also memory if needed). These
@@ -11,14 +30,14 @@ set-threads:
 # they should be high for the longest running
 set-resources:
   align_aa:
-    runtime: "4d"
+    runtime: "3h"
   realign_outliers_before_trimal:
-    runtime: "4d"
+    runtime: "3h"
   realign_outliers_after_trimal:
-    runtime: "4d"
+    runtime: "3h"
   infer_gene_trees_before_trimal:
-    runtime: "4d"
+    runtime: "55h"
   infer_gene_trees_after_trimal:
-    runtime: "4d"
+    runtime: "55h"
   final_gene_trees:
-    runtime: "4d"
+    runtime: "3d"
