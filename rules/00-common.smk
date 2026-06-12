@@ -31,6 +31,11 @@ def get_filtered_genes_final(wildcards):
 def get_aln_params(wildcards, input):
     aligner = config["params"]["align_aa"]["aligner"]
     if aligner != "auto":
+        if aligner not in ["einsi", "linsi", "ginsi", "fftns", "fftnsi"]:
+            raise ValueError(
+                "Configured aligner not supported. Choose from 'auto', 'einsi',"
+                "'linsi', 'ginsi', 'fftns', or 'fftnsi'."
+            )
         return aligner
     auto_criterion = config["params"]["align_aa"]["auto_criterion"]
     if auto_criterion != "filesize":
