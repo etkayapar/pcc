@@ -1,4 +1,4 @@
-containerized: "docker://ghcr.io/etkayapar/pcc:0.1.0"
+containerized: "docker://ghcr.io/etkayapar/pcc:0.2.0"
 
 include: "rules/00-common.smk"
 include: "rules/01-before_trimal.smk"

@@ -13,6 +13,7 @@ params:
       mafft_tmpdir: "" ## Here you can provide a directory you create as the base-level alignment tmpdir. Leave empty unless you are facing TMPDIR related problems.
     concatenate:
         min_aln_len: 0
+    intermediate_tree_method: "fasttree" # choose between fasttree and iqtree for estimating intermediate trees for outlier removal
     detect_outliers:
         taxa_threshold: 0.7
         long_branch_threshold: 0.08

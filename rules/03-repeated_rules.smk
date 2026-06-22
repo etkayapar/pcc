@@ -1,23 +1,49 @@
 STAGES=["before_trimal", "after_trimal"]
 for stage in STAGES:
-    rule:
-        name: f"infer_gene_trees_{stage}"
-        input:
-            f"output/{stage}/gene_tree_input/{{gene}}.fa"
-        output:
-            treefile=f"output/{stage}/gene_trees/{{gene}}/{{gene}}.treefile",
-            treedir=directory(f"output/{stage}/gene_trees/{{gene}}")
-        threads: 4
-        conda:
-            "../envs/iqtree.yaml"
-        params:
-            prefix=f"output/{stage}/gene_trees/{{gene}}/{{gene}}"
-        shell:
-            """
-            iqtree2 -s {input} \
+    if config["params"]["intermediate_tree_method"] == "iqtree":
+        rule:
+            name: f"infer_gene_trees_{stage}_iqtree"
+            input:
+                f"output/{stage}/gene_tree_input/{{gene}}.fa"
+            output:
+                treefile=f"output/{stage}/gene_trees/{{gene}}/{{gene}}.treefile",
+            threads: 4
+            conda:
+                "../envs/iqtree.yaml"
+            params:
+                prefix=f"output/{stage}/gene_trees/{{gene}}/{{gene}}"
+            resources:
+                runtime="2d"
+            shell:
+                """
+                iqtree2 -s {input} \
                     -m MFP -mset GTR -mrate I+R \
                     -T {threads} --prefix {params.prefix} -st DNA --keep-ident
-            """
+                """
+
+    elif config["params"]["intermediate_tree_method"] == "fasttree":
+        rule:
+            name: f"infer_gene_trees_{stage}_fasttree"
+            input:
+                f"output/{stage}/gene_tree_input/{{gene}}.fa"
+            output:
+                treefile=f"output/{stage}/gene_trees/{{gene}}/{{gene}}.treefile",
+            threads: 1
+            conda:
+                "../envs/fasttree.yaml"
+            resources:
+                runtime="2h"
+            shell:
+                """
+                fasttree -gtr -gamma -nt < {input} > {output.treefile}
+                """
+
+    else:
+        raise ValueError(
+                "Set params > intermediate_tree_method in the config.yaml to "
+                "either 'fasttree' or 'iqtree'"
+            )
+
     rule:
         name: f"collect_gene_trees_{stage}"
         input:

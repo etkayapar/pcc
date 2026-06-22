@@ -33,7 +33,7 @@ def get_aln_params(wildcards, input):
     if aligner != "auto":
         if aligner not in ["einsi", "linsi", "ginsi", "fftns", "fftnsi"]:
             raise ValueError(
-                "Configured aligner not supported. Choose from 'auto', 'einsi',"
+                "Configured aligner not supported. Choose from 'auto', 'einsi', "
                 "'linsi', 'ginsi', 'fftns', or 'fftnsi'."
             )
         return aligner
