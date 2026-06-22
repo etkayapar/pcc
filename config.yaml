@@ -3,7 +3,7 @@
 gene_table: gene_table.tsv
 params:
     general:
-        maxgap_pct: 0.95
+        maxgap_pct: 1.0
     align_aa:
       aligner: "fftns" ##harcode an alignment algo 'einsi', 'linsi', 'ginsi', 'fftns' or 'fftnsi', or set it to "auto"
       auto_criterion: "filesize" ##"filesize" or "mafft", in the latter case we run "mafft --auto"
